@@ -4,6 +4,7 @@
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
+        <deployment identifier="watchOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14460.16"/>
     </dependencies>
@@ -20,16 +21,6 @@
                                         <items>
                                             <group width="1" alignment="center" verticalAlignment="center" layout="vertical" id="3C3-AV-Nf5">
                                                 <items>
-                                                    <group alignment="center" id="kI8-fQ-pbP">
-                                                        <items>
-                                                            <label alignment="center" verticalAlignment="center" text="+" textAlignment="right" id="MGX-Dg-cDm">
-                                                                <color key="textColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                            </label>
-                                                            <timer alignment="center" verticalAlignment="center" textAlignment="left" enabled="YES" format="abbreviated" previewedSeconds="43200" id="20a-fU-bjA">
-                                                                <color key="textColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                            </timer>
-                                                        </items>
-                                                    </group>
                                                     <label alignment="center" verticalAlignment="center" text="㊏" textAlignment="center" id="FHu-59-Ult">
                                                         <fontDescription key="font" style="UICTFontTextStyleTitle0"/>
                                                     </label>
@@ -40,12 +31,9 @@
                                                     <label alignment="center" verticalAlignment="center" text="Hour 0" id="XCD-fy-YbI"/>
                                                     <group alignment="center" verticalAlignment="bottom" id="Q88-4X-2KR">
                                                         <items>
-                                                            <label alignment="center" verticalAlignment="center" text="-" textAlignment="right" id="Bt1-H0-074">
-                                                                <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                            </label>
-                                                            <timer alignment="center" verticalAlignment="center" textAlignment="left" enabled="YES" format="abbreviated" previewedSeconds="43200" id="R3y-b4-gyD">
-                                                                <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                            </timer>
+                                                            <label alignment="left" text="Start" id="X1R-tN-2zv"/>
+                                                            <label alignment="left" text="-" id="lOj-WG-eUf"/>
+                                                            <label alignment="left" text="End" id="qdK-TQ-SoJ"/>
                                                         </items>
                                                     </group>
                                                 </items>
@@ -55,13 +43,12 @@
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </group>
                                     <connections>
-                                        <outlet property="countDownTimer" destination="R3y-b4-gyD" id="Ryo-iH-ZRl"/>
                                         <outlet property="countDownTimerGroup" destination="Q88-4X-2KR" id="2B5-ch-BcO"/>
-                                        <outlet property="countUpTimer" destination="20a-fU-bjA" id="Qdy-tl-I6j"/>
-                                        <outlet property="countUpTimerGroup" destination="kI8-fQ-pbP" id="a3E-wg-UvP"/>
+                                        <outlet property="endDateLabel" destination="qdK-TQ-SoJ" id="acW-6J-KT1"/>
                                         <outlet property="hourLabel" destination="XCD-fy-YbI" id="uzQ-JY-Wuz"/>
                                         <outlet property="planetLabel" destination="gux-oU-qaw" id="LU7-zJ-qrW"/>
                                         <outlet property="rowGroup" destination="MJ0-iX-qT4" id="Rz1-wY-DMI"/>
+                                        <outlet property="startDateLabel" destination="X1R-tN-2zv" id="ctf-ym-wfn"/>
                                         <outlet property="symbolLabel" destination="FHu-59-Ult" id="xSK-da-cvw"/>
                                     </connections>
                                 </tableRow>
@@ -73,20 +60,20 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="-55" y="320"/>
+            <point key="canvasLocation" x="-103" y="378"/>
         </scene>
         <!--Static Notification Interface Controller-->
         <scene sceneID="zKT-EZ-f9A">
             <objects>
-                <notificationController id="SwR-XL-SQr" customClass="NotificationController">
+                <notificationController id="SwR-XL-SQr">
                     <items>
                         <label alignment="left" text="Alert Label" id="2k8-ZO-08K"/>
                     </items>
-                    <notificationCategory key="notificationCategory" id="Cty-fz-ROn"/>
+                    <notificationCategory key="notificationCategory" identifier="PlanetaryHourNotification" id="Cty-fz-ROn"/>
                     <connections>
                         <outlet property="notificationAlertLabel" destination="2k8-ZO-08K" id="58w-4D-oMb"/>
                         <segue destination="EM1-hM-uQi" kind="relationship" relationship="dynamicNotificationInterface" id="W92-1Q-Y8Y"/>
-                        <segue destination="BoC-Wg-ndv" kind="relationship" relationship="dynamicInteractiveNotificationInterface" id="hgu-Hs-baH"/>
+                        <segue destination="x1a-fN-fjQ" kind="relationship" relationship="dynamicInteractiveNotificationInterface" id="LNH-dV-ftC"/>
                     </connections>
                 </notificationController>
             </objects>
@@ -100,9 +87,9 @@
             <point key="canvasLocation" x="197" y="678"/>
         </scene>
         <!--Notification Controller-->
-        <scene sceneID="YNX-w1-WJD">
+        <scene sceneID="j49-EN-qTw">
             <objects>
-                <controller id="BoC-Wg-ndv" customClass="NotificationController"/>
+                <controller id="x1a-fN-fjQ" customClass="NotificationController"/>
             </objects>
             <point key="canvasLocation" x="197" y="378"/>
         </scene>

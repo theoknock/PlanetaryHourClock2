@@ -352,5 +352,43 @@ NSArray<NSNumber *> *(^hourDurations)(NSTimeInterval) = ^(NSTimeInterval daySpan
     planetaryHoursDictionaries();
 }
 
+- (void)planetaryHour:(PlanetaryHourCompletionBlock)planetaryHour
+{
+    FESSolarCalculator *solarCalculation = [self solarCalculationForDate:nil location:nil];
+    NSTimeInterval daySpan         = [solarCalculation.sunset timeIntervalSinceDate:solarCalculation.sunrise];
+    NSArray<NSNumber *> *durations = hourDurations(daySpan);
+    
+    __block NSInteger hour         = 0;
+    __block dispatch_block_t planetaryHoursDictionaries;
+    
+    void(^planetaryHoursDictionary)(void) = ^(void) {
+        Meridian meridian                 = (hour < HOURS_PER_SOLAR_TRANSIT) ? AM : PM;
+        SolarTransit transit              = (hour < HOURS_PER_SOLAR_TRANSIT) ? Sunrise : Sunset;
+        NSInteger mod_hour                = hour % 12;
+        NSTimeInterval startTimeInterval  = durations[meridian].doubleValue * mod_hour;
+        NSDate *sinceDate                 = (transit == Sunrise) ? solarCalculation.sunrise : solarCalculation.sunset;
+        NSDate *startTime                 = [[NSDate alloc] initWithTimeInterval:startTimeInterval sinceDate:sinceDate];
+        NSTimeInterval endTimeInterval    = durations[meridian].doubleValue * (mod_hour + 1);
+        NSDate *endTime                   = [[NSDate alloc] initWithTimeInterval:endTimeInterval sinceDate:sinceDate];
+        NSDateInterval *dateInterval      = [[NSDateInterval alloc] initWithStartDate:startTime endDate:endTime];
+        
+        NSAttributedString *symbol        = attributedPlanetSymbol(planetSymbolForHour(solarCalculation.sunrise, hour));
+        NSString *name                    = planetNameForHour(solarCalculation.sunrise, hour);
+        if ([dateInterval containsDate:[NSDate date]])
+            planetaryHour(symbol, name, startTime, endTime, hour, ([dateInterval containsDate:[NSDate date]]) ? YES : NO);
+        
+        hour++;
+        if (hour < HOURS_PER_DAY)
+            planetaryHoursDictionaries();
+    };
+    
+    planetaryHoursDictionaries = ^{
+        
+        planetaryHoursDictionary();
+    };
+    planetaryHoursDictionaries();
+}
+
+
 
 @end
