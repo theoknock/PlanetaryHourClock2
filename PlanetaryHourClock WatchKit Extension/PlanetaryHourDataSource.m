@@ -77,20 +77,20 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
 {
     NSLog(@"%s\n%@", __PRETTY_FUNCTION__, error.localizedDescription);
     
-        dispatch_block_t locate;
-        __block dispatch_block_t validateLocation = ^(void) {
-            if (!CLLocationCoordinate2DIsValid([[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate]))
-            {
-                locate();
-            }
-        };
-    
-        locate = ^(void) {
-            [[[PlanetaryHourDataSource sharedDataSource] locationManager] requestLocation];
-            validateLocation();
-        };
-    
-        locate();
+//        dispatch_block_t locate;
+//        __block dispatch_block_t validateLocation = ^(void) {
+//            if (!CLLocationCoordinate2DIsValid([[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate]))
+//            {
+//                locate();
+//            }
+//        };
+//
+//        locate = ^(void) {
+//            [[[PlanetaryHourDataSource sharedDataSource] locationManager] requestLocation];
+//            validateLocation();
+//        };
+//
+//        locate();
 }
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
@@ -106,7 +106,34 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
             status == kCLAuthorizationStatusAuthorizedAlways)
         {
             NSLog(@"Location services authorized\t%d", status);
-            //            [manager startUpdatingLocation];
+            
+            __block dispatch_block_t locate;
+            dispatch_block_t validateLocation = ^(void) {
+                if (!CLLocationCoordinate2DIsValid(manager.location.coordinate) ||
+                    [[manager location] coordinate].latitude == 0.0 ||
+                    [[manager location] coordinate].longitude == 0.0)
+                {
+                    locate();
+                }
+                else {
+                    NSLog(@"Latitude: %f\tLongitude: %f\t\t%@", [[manager location] coordinate].latitude,
+                          [[manager location] coordinate].longitude,
+                          [[NSDate date] descriptionWithLocale:[NSLocale currentLocale]]);
+                    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+                    [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
+                    [dateFormatter setTimeStyle:NSDateFormatterMediumStyle];
+                    [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
+                    NSString *currentTime = [dateFormatter stringFromDate:[NSDate date]];
+                    NSLog(@"Localized date\t%@", [currentTime description]);
+                }
+            };
+            
+            locate = ^(void) {
+                [manager requestLocation];
+                validateLocation();
+            };
+            
+            locate();
         } else {
             NSLog(@"Location services authorization status code:\t%d", status);
         }

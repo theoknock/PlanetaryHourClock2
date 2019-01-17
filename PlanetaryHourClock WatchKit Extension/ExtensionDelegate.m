@@ -14,36 +14,6 @@
 - (void)applicationDidFinishLaunching {
     // Perform any final initialization of your application.
     
-    dispatch_block_t locate;
-    __block dispatch_block_t validateLocation = ^(void) {
-        CLLocation *lastLocation = [[[PlanetaryHourDataSource sharedDataSource] locationManager] location];
-        if (!CLLocationCoordinate2DIsValid(lastLocation.coordinate) ||
-            [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].latitude == 0.0 ||
-            [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].longitude == 0.0 ||
-            [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].latitude != lastLocation.coordinate.latitude ||
-            [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].longitude != lastLocation.coordinate.longitude)
-        {
-            locate();
-        }
-//        else {
-//            NSLog(@"Latitude: %f\tLongitude: %f\t\t%@", [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].latitude,
-//                  [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].longitude,
-//                  [[NSDate date] descriptionWithLocale:[NSLocale currentLocale]]);
-//            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-//            [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
-//            [dateFormatter setTimeStyle:NSDateFormatterMediumStyle];
-//            [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
-//            NSString *currentTime = [dateFormatter stringFromDate:[NSDate date]];
-//            NSLog(@"Localized date\t%@", [currentTime description]);
-//        }
-    };
-    
-    locate = ^(void) {
-        [[[PlanetaryHourDataSource sharedDataSource] locationManager] requestLocation];
-        validateLocation();
-    };
-    
-    locate();
     
 }
 

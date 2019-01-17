@@ -34,6 +34,8 @@
 - (void)willActivate {
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
+    
+    [self updateInterface];
 }
 
 - (void)didDeactivate {
@@ -102,6 +104,10 @@
                                               NSLog(@"Error adding notification request to notification center:\t%@", error.description);
                                           }
                                       }];
+                                  }];
+                                  
+                                  [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                                      [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
                                   }];
                               }
                           }];
