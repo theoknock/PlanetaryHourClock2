@@ -250,6 +250,7 @@ double const toDegrees = 180 / M_PI;
 {
     // calculation of Julian Day Number (http://en.wikipedia.org/wiki/Julian_day ) from Gregorian Date
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+
     NSDateComponents *components = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay fromDate:inDate];
     int a = (14 - (int)[components month]) / 12;
     int y = (int)[components year] +  4800 - a;
@@ -287,6 +288,7 @@ double const toDegrees = 180 / M_PI;
     components.second = (int)((minutes - floor(minutes)) * 60);
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     NSDate *returnDate = [calendar dateFromComponents:components];
+    
     return returnDate;
 }
 

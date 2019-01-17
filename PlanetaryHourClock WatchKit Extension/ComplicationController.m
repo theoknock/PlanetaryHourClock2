@@ -26,24 +26,28 @@
 
 - (NSDate *)toLocalTime:(NSDate *)date
 {
-    NSTimeZone *tz = [NSTimeZone defaultTimeZone];
-    NSInteger seconds = [tz secondsFromGMTForDate:date];
-    
-    return [NSDate dateWithTimeInterval:seconds sinceDate:date];
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSDateComponents *dateComponents = [calendar componentsInTimeZone:[NSTimeZone systemTimeZone] fromDate:date];
+    dateComponents.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+    dateComponents.calendar          = calendar;
+
+    NSDate *currentTime = [calendar dateFromComponents:dateComponents];
+
+    return currentTime;
 }
 
 - (void)getTimelineStartDateForComplication:(CLKComplication *)complication withHandler:(void(^)(NSDate * __nullable date))handler {
-    NSDate *startDate = [PlanetaryHourDataSource.sharedDataSource solarCalculationForDate:nil location:nil].sunrise;
-    NSDate *localStartDate = [self toLocalTime:startDate];
-    handler(localStartDate);
+    // The sunrise/sunset dates may not have the time zone information in them
+    NSDate *startDate = [self toLocalTime:[PlanetaryHourDataSource.sharedDataSource solarCalculationForDate:nil location:nil].sunrise];
+    
+    handler(startDate);
     NSLog(@"Timeline start date\t%@", [startDate description]);
 }
 
 - (void)getTimelineEndDateForComplication:(CLKComplication *)complication withHandler:(void(^)(NSDate * __nullable date))handler {
-    NSDate *endDate = [PlanetaryHourDataSource.sharedDataSource solarCalculationForDate:nil location:nil].sunset;
-    NSDate *localEndDate = [self toLocalTime:endDate];
-    handler(localEndDate);
-    NSLog(@"Timeline end date\t%@", [localEndDate description]);
+    NSDate *endDate = [self toLocalTime:[PlanetaryHourDataSource.sharedDataSource solarCalculationForDate:nil location:nil].sunset];
+    handler(endDate);
+    NSLog(@"Timeline end date\t%@", [endDate description]);
 }
 
 - (void)getPrivacyBehaviorForComplication:(CLKComplication *)complication withHandler:(void(^)(CLKComplicationPrivacyBehavior privacyBehavior))handler {
@@ -52,13 +56,27 @@
 
 #pragma mark - Timeline Population
 
-- (CLKComplicationTemplate *)populateTimelineEntryForComplication:(CLKComplication *)complication date:(NSDate *)date {
+- (void)getCurrentTimelineEntryForComplication:(CLKComplication *)complication withHandler:(void(^)(CLKComplicationTimelineEntry * __nullable))handler {
+//    dispatch_block_t locate;
+//    __block dispatch_block_t validateLocation = ^(void) {
+//        if (!CLLocationCoordinate2DIsValid([[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate]))
+//        {
+//            locate();
+//        }
+//    };
+//    
+//    locate = ^(void) {
+//        [[[PlanetaryHourDataSource sharedDataSource] locationManager] requestLocation];
+//        validateLocation();
+//    };
+//    
+//    locate();
+//    
+    
     CLKComplicationTemplate *template = [self templateForeComplication:complication] ;
-    if (!template) {
-        return nil ;
-    } else {
-        
+    if (template) {
         [PlanetaryHourDataSource.sharedDataSource planetaryHour:^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, BOOL current) {
+            NSLog(@"Timeline dates for current complication\t%@ - \t\t%@ (%@)", [[self toLocalTime:startDate] description], [[self toLocalTime:endDate] description], [[self toLocalTime:[NSDate date]] description]);
             switch (complication.family) {
                 case CLKComplicationFamilyModularLarge:
                     ((CLKSimpleTextProvider *)((CLKComplicationTemplateModularLargeTallBody *)template).headerTextProvider).text = name;
@@ -82,21 +100,10 @@
                 default:
                     break ;
             }
+            CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:[self toLocalTime:startDate] complicationTemplate:template] ;
+            handler(tle);
         }];
     }
-    return template ;
-}
-
-- (void)getCurrentTimelineEntryForComplication:(CLKComplication *)complication withHandler:(void(^)(CLKComplicationTimelineEntry * __nullable))handler {
-    CLKComplicationTemplate *template = [self populateTimelineEntryForComplication:complication date:[NSDate date]] ;
-    
-    if (!template) {
-        handler(nil) ;
-        return ;
-    }
-    
-    CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:[NSDate date] complicationTemplate:template] ;
-    handler(tle);
 }
 
 //- (void)getCurrentTimelineEntryForComplication:(CLKComplication *)complication withHandler:(void(^)(CLKComplicationTimelineEntry * __nullable))handler {
@@ -140,10 +147,47 @@
 
 - (void)getTimelineEntriesForComplication:(CLKComplication *)complication afterDate:(NSDate *)date limit:(NSUInteger)limit withHandler:(void(^)(NSArray<CLKComplicationTimelineEntry *> * __nullable entries))handler {
     // Call the handler with the timeline entries after the given date
-    [PlanetaryHourDataSource.sharedDataSource planetaryHours:^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, BOOL current) {
-        CLKComplicationTemplate *template = [self populateTimelineEntryForComplication:complication date:startDate];
-        CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:[NSDate date] complicationTemplate:template] ;
-    }];
+//    NSMutableArray *entries = [NSMutableArray arrayWithCapacity:limit];
+//    [PlanetaryHourDataSource.sharedDataSource planetaryHours:^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, BOOL current) {
+//        if (!current && entries.count < limit)
+//        {
+//            NSLog(@"Not current; entries == %lu", (unsigned long)entries.count);
+//            CLKComplicationTemplate *template = [self templateForeComplication:complication] ;
+//            if (template) {
+//                switch (complication.family) {
+//                    case CLKComplicationFamilyModularLarge:
+//                        ((CLKSimpleTextProvider *)((CLKComplicationTemplateModularLargeTallBody *)template).headerTextProvider).text = name;
+//                        ((CLKSimpleTextProvider *)((CLKComplicationTemplateModularLargeTallBody *)template).bodyTextProvider).text = [symbol string];
+//                        break ;
+//                    case CLKComplicationFamilyModularSmall:
+//                        ((CLKSimpleTextProvider *)((CLKComplicationTemplateModularSmallSimpleText *)template).textProvider).text = [symbol string];
+//                        break ;
+//                    case CLKComplicationFamilyUtilitarianLarge:
+//                        ((CLKSimpleTextProvider *)((CLKComplicationTemplateUtilitarianLargeFlat *)template).textProvider).text = [symbol string];
+//                        break ;
+//                    case CLKComplicationFamilyUtilitarianSmall:
+//                        ((CLKSimpleTextProvider *)((CLKComplicationTemplateUtilitarianSmallFlat *)template).textProvider).text = [symbol string];
+//                        break ;
+//                    case CLKComplicationFamilyExtraLarge:
+//                        ((CLKSimpleTextProvider *)((CLKComplicationTemplateExtraLargeSimpleText *)template).textProvider).text = [symbol string];
+//                        break;
+//                    case CLKComplicationFamilyCircularSmall:
+//                        ((CLKSimpleTextProvider *)((CLKComplicationTemplateCircularSmallRingText *)template).textProvider).text = [symbol string];
+//                        break;
+//                    default:
+//                        break ;
+//                }
+//                CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:startDate complicationTemplate:template] ;
+//                [entries addObject:tle];
+//            }
+//        } else if (entries.count == (limit - 1))
+//        {
+//            NSLog(@"Reached limit");
+//            handler(entries);
+//        }
+//        
+//        
+//    }];
     handler(nil);
 }
 
@@ -244,8 +288,19 @@
 
 - (void)getPlaceholderTemplateForComplication:(CLKComplication *)complication withHandler:(void (^)(CLKComplicationTemplate * _Nullable))handler
 {
+    [PlanetaryHourDataSource.sharedDataSource setDelegate:(id<PlanetaryHourDataSourceDelegate> _Nullable)self];
+    
     CLKComplicationTemplate *template = [self templateForeComplication:complication] ;
     handler(template) ;
+}
+
+- (void)updateComplicationTimelines
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
+        }];
+    });
 }
 
 //- (void)getPlaceholderTemplateForComplication:(CLKComplication *)complication withHandler:(void (^)(CLKComplicationTemplate * _Nullable))handler
@@ -301,4 +356,6 @@
 //}
 
 @end
+
+
 

@@ -97,7 +97,7 @@
                                       
                                       [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
                                           if (!error) {
-                                              NSLog(@"Added notification request %ld to notification center for date %@", (long)hour, dateComponents.date);
+//                                              NSLog(@"Added notification request %ld to notification center for date %@", (long)hour, dateComponents.date);
                                           } else {
                                               NSLog(@"Error adding notification request to notification center:\t%@", error.description);
                                           }

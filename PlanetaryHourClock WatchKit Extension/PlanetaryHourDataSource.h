@@ -16,15 +16,23 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString *name, NSDate *startDate, NSDate *endDate, NSInteger hour, BOOL current);
 
+@protocol PlanetaryHourDataSourceDelegate <NSObject>
+
+- (void)updateComplicationTimelines;
+
+@end
+
 @interface PlanetaryHourDataSource : NSObject <CLLocationManagerDelegate>
 
 + (nonnull PlanetaryHourDataSource *)sharedDataSource;
 
+@property (weak) id<PlanetaryHourDataSourceDelegate> delegate;
 @property (strong, nonatomic) CLLocationManager *locationManager;
 @property (strong, nonatomic) dispatch_queue_t planetaryHourDataRequestQueue;
 
 - (void)planetaryHours:(PlanetaryHourCompletionBlock)planetaryHour;
 - (void)planetaryHour:(PlanetaryHourCompletionBlock)planetaryHour;
+- (void)planetForHour:(NSUInteger)hour completionBlock:(PlanetaryHourCompletionBlock)planetaryHour;
 - (FESSolarCalculator *)solarCalculationForDate:(NSDate *)date location:(CLLocation *)location;
 
 @end

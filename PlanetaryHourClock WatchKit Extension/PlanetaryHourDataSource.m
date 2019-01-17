@@ -11,6 +11,18 @@
 
 @implementation PlanetaryHourDataSource
 
+@synthesize delegate = _delegate;
+
+- (void)setDelegate:(id<PlanetaryHourDataSourceDelegate>)delegate
+{
+    _delegate = delegate;
+}
+
+- (id<PlanetaryHourDataSourceDelegate>)delegate
+{
+    return _delegate;
+}
+
 static PlanetaryHourDataSource *sharedDataSource = NULL;
 + (nonnull PlanetaryHourDataSource *)sharedDataSource
 {
@@ -64,7 +76,21 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
     NSLog(@"%s\n%@", __PRETTY_FUNCTION__, error.localizedDescription);
-    [manager requestLocation];
+    
+        dispatch_block_t locate;
+        __block dispatch_block_t validateLocation = ^(void) {
+            if (!CLLocationCoordinate2DIsValid([[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate]))
+            {
+                locate();
+            }
+        };
+    
+        locate = ^(void) {
+            [[[PlanetaryHourDataSource sharedDataSource] locationManager] requestLocation];
+            validateLocation();
+        };
+    
+        locate();
 }
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
@@ -72,7 +98,7 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
     if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted)
     {
         NSLog(@"Failure to authorize location services\t%d", status);
-//        [manager stopUpdatingLocation];
+        //        [manager stopUpdatingLocation];
     }
     else
     {
@@ -80,7 +106,7 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
             status == kCLAuthorizationStatusAuthorizedAlways)
         {
             NSLog(@"Location services authorized\t%d", status);
-//            [manager startUpdatingLocation];
+            //            [manager startUpdatingLocation];
         } else {
             NSLog(@"Location services authorization status code:\t%d", status);
         }
@@ -94,6 +120,8 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
     [[NSNotificationCenter defaultCenter] postNotificationName:@"PlanetaryHoursDataSourceUpdatedNotification"
                                                         object:nil
                                                       userInfo:nil];
+    if ([_delegate respondsToSelector:@selector(updateComplicationTimelines)])
+        [_delegate updateComplicationTimelines];
 }
 
 #pragma mark - Planetary Hour Calculation definitions and enumerations
@@ -191,7 +219,7 @@ NSString *(^planetNameForDay)(NSDate * _Nullable) = ^(NSDate * _Nullable date)
             return @"Mars";
             break;
         case WED:
-            return @"Venus";
+            return @"Mercury";
             break;
         case THU:
             return @"Jupiter";
@@ -224,7 +252,7 @@ NSString *(^planetNameForHour)(NSDate * _Nullable, NSUInteger) = ^(NSDate * _Nul
             return @"Mars";
             break;
         case Mercury:
-            return @"Venus";
+            return @"Mercury";
             break;
         case Jupiter:
             return @"Jupiter";
@@ -300,10 +328,11 @@ NSAttributedString *(^attributedPlanetSymbol)(NSString *) = ^(NSString *symbol) 
         NSDateComponents *components = [[NSDateComponents alloc] init];
         components.day = -1;
         NSDate *yesterday = [calendar dateByAddingComponents:components toDate:date options:NSCalendarMatchNextTimePreservingSmallerUnits];
-        solarCalculator = [[FESSolarCalculator alloc] initWithDate:yesterday location:location];
+        FESSolarCalculator *solarCalculator2 = [[FESSolarCalculator alloc] initWithDate:yesterday location:location];
+        return solarCalculator2;
+    } else {
+        return solarCalculator;
     }
-    
-    return solarCalculator;
 }
 
 NSArray<NSNumber *> *(^hourDurations)(NSTimeInterval) = ^(NSTimeInterval daySpan)
@@ -347,7 +376,7 @@ NSArray<NSNumber *> *(^hourDurations)(NSTimeInterval) = ^(NSTimeInterval daySpan
     
     planetaryHoursDictionaries = ^{
         
-            planetaryHoursDictionary();
+        planetaryHoursDictionary();
     };
     planetaryHoursDictionaries();
 }
@@ -375,20 +404,42 @@ NSArray<NSNumber *> *(^hourDurations)(NSTimeInterval) = ^(NSTimeInterval daySpan
         NSAttributedString *symbol        = attributedPlanetSymbol(planetSymbolForHour(solarCalculation.sunrise, hour));
         NSString *name                    = planetNameForHour(solarCalculation.sunrise, hour);
         if ([dateInterval containsDate:[NSDate date]])
+        {
             planetaryHour(symbol, name, startTime, endTime, hour, ([dateInterval containsDate:[NSDate date]]) ? YES : NO);
-        
-        hour++;
-        if (hour < HOURS_PER_DAY)
-            planetaryHoursDictionaries();
+            NSLog(@"CURRENT HOUR %ld", (long)hour);
+        } else {
+            hour++;
+            if (hour < HOURS_PER_DAY)
+                planetaryHoursDictionaries();
+        }
     };
     
     planetaryHoursDictionaries = ^{
-        
         planetaryHoursDictionary();
     };
     planetaryHoursDictionaries();
 }
 
-
+- (void)planetForHour:(NSUInteger)hour completionBlock:(PlanetaryHourCompletionBlock)planetaryHour
+{
+    FESSolarCalculator *solarCalculation = [self solarCalculationForDate:nil location:nil];
+    NSTimeInterval daySpan         = [solarCalculation.sunset timeIntervalSinceDate:solarCalculation.sunrise];
+    NSArray<NSNumber *> *durations = hourDurations(daySpan);
+    
+    Meridian meridian                 = (hour < HOURS_PER_SOLAR_TRANSIT) ? AM : PM;
+    SolarTransit transit              = (hour < HOURS_PER_SOLAR_TRANSIT) ? Sunrise : Sunset;
+    NSInteger mod_hour                = hour % 12;
+    NSTimeInterval startTimeInterval  = durations[meridian].doubleValue * mod_hour;
+    NSDate *sinceDate                 = (transit == Sunrise) ? solarCalculation.sunrise : solarCalculation.sunset;
+    NSDate *startTime                 = [[NSDate alloc] initWithTimeInterval:startTimeInterval sinceDate:sinceDate];
+    NSTimeInterval endTimeInterval    = durations[meridian].doubleValue * (mod_hour + 1);
+    NSDate *endTime                   = [[NSDate alloc] initWithTimeInterval:endTimeInterval sinceDate:sinceDate];
+    NSDateInterval *dateInterval      = [[NSDateInterval alloc] initWithStartDate:startTime endDate:endTime];
+    
+    NSAttributedString *symbol        = attributedPlanetSymbol(planetSymbolForHour(solarCalculation.sunrise, hour));
+    NSString *name                    = planetNameForHour(solarCalculation.sunrise, hour);
+    planetaryHour(symbol, name, startTime, endTime, hour, ([dateInterval containsDate:[NSDate date]]) ? YES : NO);
+}
 
 @end
+
