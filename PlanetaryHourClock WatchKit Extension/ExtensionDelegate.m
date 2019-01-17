@@ -16,9 +16,12 @@
     
     dispatch_block_t locate;
     __block dispatch_block_t validateLocation = ^(void) {
-        if (!CLLocationCoordinate2DIsValid([[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate]) ||
+        CLLocation *lastLocation = [[[PlanetaryHourDataSource sharedDataSource] locationManager] location];
+        if (!CLLocationCoordinate2DIsValid(lastLocation.coordinate) ||
             [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].latitude == 0.0 ||
-            [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].longitude == 0.0)
+            [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].longitude == 0.0 ||
+            [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].latitude != lastLocation.coordinate.latitude ||
+            [[[[PlanetaryHourDataSource sharedDataSource] locationManager] location] coordinate].longitude != lastLocation.coordinate.longitude)
         {
             locate();
         } else {

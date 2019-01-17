@@ -26,12 +26,11 @@
 
 - (NSDate *)toLocalTime:(NSDate *)date
 {
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSCalendar *calendar             = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     NSDateComponents *dateComponents = [calendar componentsInTimeZone:[NSTimeZone systemTimeZone] fromDate:date];
-    dateComponents.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+    dateComponents.timeZone          = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
     dateComponents.calendar          = calendar;
-
-    NSDate *currentTime = [calendar dateFromComponents:dateComponents];
+    NSDate *currentTime              = [calendar dateFromComponents:dateComponents];
 
     return currentTime;
 }
