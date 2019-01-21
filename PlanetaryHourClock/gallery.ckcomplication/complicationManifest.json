@@ -1,0 +1,16 @@
+{
+  "supported complication families" : {
+    "7" : "C4B6C986-31AA-4796-BF0E-342A61664068.json",
+    "3" : "5303CCAE-8DD4-4290-A569-39D25ABCD3DC.json",
+    "8" : "3B4ECA41-EA78-4E94-A054-36CB8CE17C95.json",
+    "11" : "679E00B3-F02D-4A3E-89CC-CF47623DDDB7.json",
+    "0" : "BA94DE78-A7BB-4FA5-8913-6CD099B994B9.json",
+    "4" : "C70711CE-D7CF-4209-97A0-DB75F6B412F5.json",
+    "9" : "7545FDD2-C85F-4E31-A747-E4AED5A2189D.json",
+    "1" : "2CB8A36F-E28D-4612-ABB4-78989B9D30B5.json",
+    "6" : "F74FF6F5-FBD6-4F01-8B88-F7F0FE5B0248.json",
+    "10" : "FE4A5FCF-B9D5-4A66-9736-D265F44A1A23.json",
+    "2" : "3546CE63-EFDB-4EA2-93DF-270C85243722.json"
+  },
+  "client ID" : "com.blogspot.demonicactivity.bush.alan.james.trashmeswiftly.watchkitapp.watchkitextension"
+}
