@@ -45,46 +45,46 @@
 #pragma mark - Placeholder Templates
 
 - (CLKComplicationTemplateModularLargeTallBody *)complicationTemplateModularLargeTallBody {
-    CLKComplicationTemplateModularLargeTallBody *template = [[CLKComplicationTemplateModularLargeTallBody alloc] init] ;
+    CLKComplicationTemplateModularLargeTallBody *template = [[CLKComplicationTemplateModularLargeTallBody alloc] init];
     template.headerTextProvider = [CLKSimpleTextProvider textProviderWithText:@"㊏"];
     template.bodyTextProvider = [CLKSimpleTextProvider textProviderWithText:@"Earth"];
-    template.tintColor = [UIColor yellowColor];
+    template.tintColor = [UIColor whiteColor];
     return template ;
 }
 
 - (CLKComplicationTemplateModularSmallSimpleText *)complicationTemplateModularSmallSimpleText {
-    CLKComplicationTemplateModularSmallSimpleText *template = [[CLKComplicationTemplateModularSmallSimpleText alloc] init] ;
+    CLKComplicationTemplateModularSmallSimpleText *template = [[CLKComplicationTemplateModularSmallSimpleText alloc] init];
     template.textProvider = [CLKSimpleTextProvider textProviderWithText:@"㊏"] ;
-    template.tintColor = [UIColor yellowColor];
+    template.tintColor = [UIColor whiteColor];
     return template ;
 }
 
 
 - (CLKComplicationTemplateUtilitarianLargeFlat *)complicationTemplateUtilitarianLargeFlat {
-    CLKComplicationTemplateUtilitarianLargeFlat *template = [[CLKComplicationTemplateUtilitarianLargeFlat alloc] init] ;
+    CLKComplicationTemplateUtilitarianLargeFlat *template = [[CLKComplicationTemplateUtilitarianLargeFlat alloc] init];
     template.textProvider = [CLKSimpleTextProvider textProviderWithText:@"㊏"] ;
-    template.tintColor = [UIColor yellowColor];
+    template.tintColor = [UIColor whiteColor];
     return template ;
 }
 
 - (CLKComplicationTemplateUtilitarianSmallFlat *)complicationTemplateUtilitarianSmallFlat {
     CLKComplicationTemplateUtilitarianSmallFlat *template = [[CLKComplicationTemplateUtilitarianSmallFlat alloc] init];
     template.textProvider = [CLKSimpleTextProvider textProviderWithText:@"㊏"] ;
-    template.tintColor = [UIColor yellowColor];
+    template.tintColor = [UIColor whiteColor];
     return template ;
 }
 
 - (CLKComplicationTemplateExtraLargeSimpleText *)complicationTemplateModularLargeSimpleText {
-    CLKComplicationTemplateExtraLargeSimpleText *template = [[CLKComplicationTemplateExtraLargeSimpleText alloc] init] ;
+    CLKComplicationTemplateExtraLargeSimpleText *template = [[CLKComplicationTemplateExtraLargeSimpleText alloc] init];
     template.textProvider = [CLKSimpleTextProvider textProviderWithText:@"㊏"] ;
-    template.tintColor = [UIColor yellowColor];
+    template.tintColor = [UIColor whiteColor];
     return template ;
 }
 
 - (CLKComplicationTemplateCircularSmallSimpleText *)complicationTemplateCircularSmallSimpleText {
-    CLKComplicationTemplateCircularSmallSimpleText *template = [[CLKComplicationTemplateCircularSmallSimpleText alloc] init] ;
+    CLKComplicationTemplateCircularSmallSimpleText *template = [[CLKComplicationTemplateCircularSmallSimpleText alloc] init];
     template.textProvider = [CLKSimpleTextProvider textProviderWithText:@"㊏"] ;
-    template.tintColor = [UIColor yellowColor];
+    template.tintColor = [UIColor whiteColor];
     return template ;
 }
 
