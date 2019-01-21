@@ -30,17 +30,11 @@
 - (void)willActivate {
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
-    [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
-    }];
 }
 
 - (void)didDeactivate {
     // This method is called when watch view controller is no longer visible
     [super didDeactivate];
-    [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
-    }];
 }
 
 - (void)didReceiveNotification:(UNNotification *)notification {

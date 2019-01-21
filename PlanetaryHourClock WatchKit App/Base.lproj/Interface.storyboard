@@ -12,28 +12,40 @@
         <!--Table Interface Controller-->
         <scene sceneID="hJs-A1-ru7">
             <objects>
-                <controller animationDuration="1" alwaysBounce="YES" fullScreen="YES" id="krG-kh-mPi" customClass="TableInterfaceController">
+                <controller animationDuration="1" alwaysBounce="YES" fullBounds="YES" fullScreen="YES" id="krG-kh-mPi" customClass="TableInterfaceController">
                     <items>
                         <table alignment="center" verticalAlignment="center" id="C7H-qT-wzu">
                             <items>
                                 <tableRow identifier="PlanetaryHoursTableRow" selectable="NO" id="GBy-fj-OJ8" customClass="PlanetaryHourRowController">
-                                    <group key="rootItem" width="1" height="0.0" alignment="left" id="MJ0-iX-qT4">
+                                    <group key="rootItem" width="1" height="1" alignment="left" id="MJ0-iX-qT4">
                                         <items>
-                                            <group width="1" alignment="center" verticalAlignment="center" layout="vertical" id="3C3-AV-Nf5">
+                                            <group width="1" height="1" alignment="center" verticalAlignment="center" layout="vertical" id="3C3-AV-Nf5">
                                                 <items>
-                                                    <label alignment="center" verticalAlignment="center" text="㊏" textAlignment="center" id="FHu-59-Ult">
+                                                    <label alignment="center" text="㊏" textAlignment="center" id="FHu-59-Ult">
                                                         <fontDescription key="font" style="UICTFontTextStyleTitle0"/>
                                                     </label>
-                                                    <label alignment="center" verticalAlignment="center" text="Earth" id="gux-oU-qaw">
+                                                    <label alignment="center" text="Earth" id="gux-oU-qaw">
                                                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                        <fontDescription key="font" style="UICTFontTextStyleTitle2"/>
+                                                        <fontDescription key="font" style="UICTFontTextStyleTitle1"/>
                                                     </label>
-                                                    <label alignment="center" verticalAlignment="center" text="Hour 0" id="XCD-fy-YbI"/>
+                                                    <label alignment="center" text="Hour 0" id="XCD-fy-YbI"/>
+                                                    <dateLabel alignment="center" verticalAlignment="bottom" id="N0r-OR-GZ9">
+                                                        <dateFormatterStyle key="dateStyle" short="YES"/>
+                                                        <date key="previewedDate" timeIntervalSinceReferenceDate="-891951120">
+                                                            <!--1972-09-26 11:48:00 +0000-->
+                                                        </date>
+                                                    </dateLabel>
                                                     <group alignment="center" verticalAlignment="bottom" id="Q88-4X-2KR">
                                                         <items>
-                                                            <label alignment="left" text="Start" id="X1R-tN-2zv"/>
-                                                            <label alignment="left" text="-" id="lOj-WG-eUf"/>
-                                                            <label alignment="left" text="End" id="qdK-TQ-SoJ"/>
+                                                            <label alignment="left" text="Start" id="X1R-tN-2zv">
+                                                                <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                                            </label>
+                                                            <label alignment="left" text="-" id="lOj-WG-eUf">
+                                                                <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                                            </label>
+                                                            <label alignment="left" text="End" id="qdK-TQ-SoJ">
+                                                                <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                                            </label>
                                                         </items>
                                                     </group>
                                                 </items>

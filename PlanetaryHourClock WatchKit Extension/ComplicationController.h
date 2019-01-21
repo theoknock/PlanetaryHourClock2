@@ -7,8 +7,7 @@
 //
 
 #import <ClockKit/ClockKit.h>
-#import "PlanetaryHourDataSource.h"
 
-@interface ComplicationController : NSObject <CLKComplicationDataSource, PlanetaryHourDataSourceDelegate>
+@interface ComplicationController : NSObject <CLKComplicationDataSource>
 
 @end

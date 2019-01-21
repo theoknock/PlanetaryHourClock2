@@ -9,31 +9,38 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
-
-#import "FESSolarCalculator.h"
+#import <WatchKit/WatchKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString *name, NSDate *startDate, NSDate *endDate, NSInteger hour, BOOL current);
+typedef NS_ENUM(NSUInteger, SolarTransit) {
+    Sunrise,
+    Sunset
+};
 
-@protocol PlanetaryHourDataSourceDelegate <NSObject>
+typedef NS_ENUM(NSUInteger, PlanetaryHoursTimelineDirection) {
+    PlanetaryHoursTimelineDirectionForward,
+    PlanetaryHoursTimelineDirectionBackward
+};
 
-- (void)updateComplicationTimelines;
-
-@end
+typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString *name, NSDate *startDate, NSDate *endDate, NSInteger hour, UIColor *color, BOOL current);
+typedef void(^PlanetaryHoursRangeCompletionBlock)(NSRange planetaryHoursRange);
 
 @interface PlanetaryHourDataSource : NSObject <CLLocationManagerDelegate>
+{
+    CLLocationCoordinate2D lastCoordinate;
+}
 
 + (nonnull PlanetaryHourDataSource *)sharedDataSource;
 
-@property (weak) id<PlanetaryHourDataSourceDelegate> delegate;
 @property (strong, nonatomic) CLLocationManager *locationManager;
 @property (strong, nonatomic) dispatch_queue_t planetaryHourDataRequestQueue;
 
-- (void)planetaryHours:(PlanetaryHourCompletionBlock)planetaryHour;
+- (void)currentPlanetaryHoursForLocation:(CLLocation *)location forDate:(NSDate *)date completionBlock:(PlanetaryHourCompletionBlock)planetaryHour;
 - (void)planetaryHour:(PlanetaryHourCompletionBlock)planetaryHour;
+- (void)planetaryHoursForTimelineDirection:(PlanetaryHoursTimelineDirection)timelineDirection markerDate:(NSDate *)date completionBlock:(PlanetaryHoursRangeCompletionBlock)completionBlock;
 - (void)planetForHour:(NSUInteger)hour completionBlock:(PlanetaryHourCompletionBlock)planetaryHour;
-- (FESSolarCalculator *)solarCalculationForDate:(NSDate *)date location:(CLLocation *)location;
+- (NSArray<NSDate *> *)solarCalculationForDate:(NSDate *)date location:(CLLocation *)location;
 
 @end
 

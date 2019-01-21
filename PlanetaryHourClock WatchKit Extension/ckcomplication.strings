@@ -1,0 +1,44 @@
+/* 
+  ckcomplication.strings
+  PlanetaryHourClock
+
+  Created by Xcode Developer on 1/17/19.
+  Copyright © 2019 The Life of a Demoniac. All rights reserved.
+*/
+
+{
+    "class" : "CLKComplicationTemplateModularLargeTallBody",
+    "headerTextProvider" : {
+        "localizableTextProviderWithStringsFileTextKey" : "㊏"
+    }
+}
+
+//template = [[CLKComplicationTemplateModularLargeTallBody alloc] init];
+//((CLKComplicationTemplateModularLargeTallBody *)template).headerTextProvider = [CLKSimpleTextProvider localizableTextProviderWithStringsFileTextKey:@"㊏"];
+//((CLKComplicationTemplateModularLargeTallBody *)template).bodyTextProvider   = [CLKSimpleTextProvider localizableTextProviderWithStringsFileTextKey:@"Earth"];
+//template.tintColor = [UIColor yellowColor];
+//break ;
+//case CLKComplicationFamilyModularSmall:
+//template = [[CLKComplicationTemplateModularSmallSimpleText alloc] init];
+//((CLKComplicationTemplateModularSmallSimpleText *)template).textProvider = [CLKSimpleTextProvider localizableTextProviderWithStringsFileTextKey:@"㊏"];
+//template.tintColor = [UIColor yellowColor];
+//break ;
+//case CLKComplicationFamilyUtilitarianLarge:
+//template = [[CLKComplicationTemplateUtilitarianLargeFlat alloc] init] ;
+//((CLKComplicationTemplateUtilitarianLargeFlat *)template).textProvider = [CLKSimpleTextProvider localizableTextProviderWithStringsFileTextKey:@"㊏"];
+//template.tintColor = [UIColor yellowColor];
+//break ;
+//case CLKComplicationFamilyUtilitarianSmall:
+//template = [[CLKComplicationTemplateUtilitarianSmallFlat alloc] init];
+//((CLKComplicationTemplateUtilitarianSmallFlat *)template).textProvider = [CLKSimpleTextProvider localizableTextProviderWithStringsFileTextKey:@"㊏"];
+//template.tintColor = [UIColor yellowColor];
+//break;
+//case CLKComplicationFamilyExtraLarge:
+//template = [[CLKComplicationTemplateExtraLargeSimpleText alloc] init] ;
+//((CLKComplicationTemplateExtraLargeSimpleText *)template).textProvider = [CLKSimpleTextProvider localizableTextProviderWithStringsFileTextKey:@"㊏"];
+//template.tintColor = [UIColor yellowColor];
+//break;
+//case CLKComplicationFamilyCircularSmall:
+//template = [[CLKComplicationTemplateCircularSmallRingText alloc] init] ;
+//((CLKComplicationTemplateCircularSmallRingText *)template).textProvider = [CLKSimpleTextProvider localizableTextProviderWithStringsFileTextKey:@"㊏"];
+//template.tintColor = [UIColor yellowColor];
