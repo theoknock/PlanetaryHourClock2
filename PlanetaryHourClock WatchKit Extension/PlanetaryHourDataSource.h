@@ -23,7 +23,7 @@ typedef NS_ENUM(NSUInteger, PlanetaryHoursTimelineDirection) {
     PlanetaryHoursTimelineDirectionBackward
 };
 
-typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString *name, NSDate *startDate, NSDate *endDate, NSInteger hour, UIColor *color, BOOL current);
+typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString *name, NSString *abbr, NSDate *startDate, NSDate *endDate, NSInteger hour, UIColor *color, BOOL current);
 typedef void(^PlanetaryHoursRangeCompletionBlock)(NSRange planetaryHoursRange);
 
 @interface PlanetaryHourDataSource : NSObject <CLLocationManagerDelegate>

@@ -340,6 +340,26 @@ NSString *(^planetSymbolForPlanet)(Planet) = ^(Planet planet) {
     }
 };
 
+NSString *(^planetAbbreviatedNameForPlanet)(NSString *) = ^(NSString *planetName) {
+    if ([planetName isEqualToString:@"Sun"])
+        return @"SUN";
+    if ([planetName isEqualToString:@"Moon"])
+        return @"MOON";
+    if ([planetName isEqualToString:@"Mars"])
+        return @"MARS";
+    if ([planetName isEqualToString:@"Mercury"])
+        return @"MERC";
+    if ([planetName isEqualToString:@"Jupiter"])
+        return @"JPTR";
+    if ([planetName isEqualToString:@"Venus"])
+        return @"VENS";
+    if ([planetName isEqualToString:@"Saturn"])
+        return @"STRN";
+    else
+        return @"EARTH";
+};
+
+
 - (NSDate *)localDateForDate:(NSDate *)date
 {
     NSCalendar *calendar             = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
@@ -525,8 +545,9 @@ NSArray<NSNumber *> *(^hourDurations)(NSTimeInterval) = ^(NSTimeInterval daySpan
         
         NSAttributedString *symbol        = attributedPlanetSymbol(planetSymbolForHour(solarTransits[Sunrise], hour));
         NSString *name                    = planetNameForHour(solarTransits[Sunrise], hour);
+        NSString *abbr                    = planetAbbreviatedNameForPlanet(name);
         UIColor *color                    = colorForPlanetSymbol([symbol string]);
-        planetaryHour(symbol, name, startDate, endDate, hour, color, ([dateInterval containsDate:date]) ? YES : NO);
+        planetaryHour(symbol, name, abbr, startDate, endDate, hour, color, ([dateInterval containsDate:date]) ? YES : NO);
         
         hour++;
         if (hour < HOURS_PER_DAY)

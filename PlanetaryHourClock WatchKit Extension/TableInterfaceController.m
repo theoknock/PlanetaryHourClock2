@@ -30,7 +30,7 @@
     [[NSNotificationCenter defaultCenter] addObserverForName:@"PlanetaryHoursDataSourceUpdatedNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
         NSLog(@"Received posted notification PlanetaryHoursDataSourceUpdatedNotification");
         [self.planetaryHoursTable setNumberOfRows:24 withRowType:@"PlanetaryHoursTableRow"];
-        [PlanetaryHourDataSource.sharedDataSource currentPlanetaryHoursForLocation:note.object forDate:[NSDate date] completionBlock:^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor *color, BOOL current ) {
+        [PlanetaryHourDataSource.sharedDataSource currentPlanetaryHoursForLocation:note.object forDate:[NSDate date] completionBlock:^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString *abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor *color, BOOL current ) {
             PlanetaryHourRowController* row = (PlanetaryHourRowController *)[self.planetaryHoursTable rowControllerAtIndex:hour];
             [row.symbolLabel setAttributedText:symbol];
             [row.planetLabel setText:name];
