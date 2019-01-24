@@ -37,7 +37,6 @@ typedef void(^PlanetaryHoursRangeCompletionBlock)(NSRange planetaryHoursRange);
 @property (strong, nonatomic) dispatch_queue_t planetaryHourDataRequestQueue;
 
 - (void)currentPlanetaryHoursForLocation:(CLLocation *)location forDate:(NSDate *)date completionBlock:(PlanetaryHourCompletionBlock)planetaryHour;
-- (void)planetaryHour:(PlanetaryHourCompletionBlock)planetaryHour;
 - (void)planetaryHoursForTimelineDirection:(PlanetaryHoursTimelineDirection)timelineDirection markerDate:(NSDate *)date completionBlock:(PlanetaryHoursRangeCompletionBlock)completionBlock;
 - (void)planetForHour:(NSUInteger)hour completionBlock:(PlanetaryHourCompletionBlock)planetaryHour;
 - (NSArray<NSDate *> *)solarCalculationForDate:(NSDate *)date location:(CLLocation *)location;
