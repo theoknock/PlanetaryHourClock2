@@ -17,7 +17,7 @@
 //    NSMutableParagraphStyle *centerAlignedParagraphStyle = [[NSMutableParagraphStyle alloc] init];
 //    centerAlignedParagraphStyle.alignment                = NSTextAlignmentCenter;
 //    NSDictionary *centerAlignedTextAttributes            = @{NSForegroundColorAttributeName : [UIColor grayColor],
-//                                                             NSFontAttributeName            : [UIFont systemFontOfSize:48.0 weight:UIFontWeightBold],
+//                                                             NSFontAttributeName            : [UIFont systemFontOfSize:8.0 weight:UIFontWeightBold],
 //                                                             NSParagraphStyleAttributeName  : centerAlignedParagraphStyle};
 //
 //    CGSize size = [text sizeWithAttributes:centerAlignedTextAttributes];
@@ -82,8 +82,8 @@ CLKComplicationTemplateModularLargeTable *(^complicationTemplateModularLargeTabl
     template.row2Column1TextProvider = [CLKSimpleTextProvider textProviderWithText:row2Column1TextProvider];
     template.row2Column2TextProvider = [CLKSimpleTextProvider textProviderWithText:row2Column2TextProvider];
     template.tintColor = color;
-//    template.headerImageProvider...
-
+    //    template.headerImageProvider...
+    
     return template;
 };
 
@@ -145,7 +145,7 @@ CLKComplicationTemplateCircularSmallStackText *(^complicationTemplateCircularSma
 CLKComplicationTemplateExtraLargeRingImage *(^complicationTemplateExtraLargeRingImage)(UIImage *, UIColor *) = ^(UIImage *image, UIColor *color)
 {
     CLKComplicationTemplateExtraLargeRingImage *template = [[CLKComplicationTemplateExtraLargeRingImage alloc] init];
-//    template.imageProvider = [CLKImageProvider imageProviderWithOnePieceImage:[self imageFromText:@"㊏"]];
+    //    template.imageProvider = [CLKImageProvider imageProviderWithOnePieceImage:[self imageFromText:@"㊏"]];
     template.tintColor = color;
     
     return template;
@@ -167,12 +167,12 @@ CLKComplicationTemplateModularSmallRingText *(^complicationTemplateModularSmallR
     
     switch (family) {
         case CLKComplicationFamilyModularLarge:
-            template = complicationTemplateModularLargeTable([data objectForKey:@"symbol"], [data objectForKey:@"name"], [data objectForKey:@"name"], [data objectForKey:@"name"], [data objectForKey:@"name"], [data objectForKey:@"color"]);
-//            template = complicationTemplateModularLargeTallBody([data objectForKey:@"symbol"], [data objectForKey:@"name"], [data objectForKey:@"color"]);
+            template = complicationTemplateModularLargeTable([data objectForKey:@"symbol"], [data objectForKey:@"name"], [data objectForKey:@"hour"], [data objectForKey:@"start"], [data objectForKey:@"end"], [data objectForKey:@"color"]);
+            //            template = complicationTemplateModularLargeTallBody([data objectForKey:@"symbol"], [data objectForKey:@"name"], [data objectForKey:@"color"]);
             break ;
         case CLKComplicationFamilyModularSmall:
             template = complicationTemplateModularSmallSimpleText([data objectForKey:@"symbol"], [data objectForKey:@"color"]);
-//            template = [self complicationTemplateModularSmallRingText];
+            //            template = [self complicationTemplateModularSmallRingText];
             break ;
         case CLKComplicationFamilyUtilitarianLarge:
             template = complicationTemplateUtilitarianLargeFlat([data objectForKey:@"symbol"], [data objectForKey:@"color"]);
@@ -182,11 +182,11 @@ CLKComplicationTemplateModularSmallRingText *(^complicationTemplateModularSmallR
             break;
         case CLKComplicationFamilyExtraLarge:
             template = complicationTemplateExtraLargeSimpleText([data objectForKey:@"symbol"], [data objectForKey:@"color"]);
-//            template = [self complicationTemplateExtraLargeRingImage];
+            //            template = [self complicationTemplateExtraLargeRingImage];
             break;
         case CLKComplicationFamilyCircularSmall:
             template = complicationTemplateCircularSmallSimpleText([data objectForKey:@"symbol"], [data objectForKey:@"color"]);
-//            template = [self complicationTemplateCircularSmallStackText];
+            //            template = [self complicationTemplateCircularSmallStackText];
             break;
         default:
             break;
@@ -195,10 +195,15 @@ CLKComplicationTemplateModularSmallRingText *(^complicationTemplateModularSmallR
     return template;
 }
 
-NSDictionary *(^planetaryHourProviderData)(NSString *, NSString *, NSString *, UIColor *) = ^(NSString *symbol, NSString *name, NSString *abbr, UIColor *color)
+NSDictionary *(^planetaryHourProviderData)(NSString *, NSString *, NSString *, NSString *, NSString *, NSString *, UIColor *) = ^(NSString *symbol, NSString *name, NSString *hour, NSString *abbr, NSString *start, NSString *end, UIColor *color)
 {
-    NSDictionary *planetaryHourProviderDataDictionary = @{@"symbol" : symbol,
+    NSDictionary *planetaryHourProviderDataDictionary = @{
+                                                          @"symbol" : symbol,
                                                           @"name"   : name,
+                                                          @"hour"   : hour,
+                                                          @"abbr"   : abbr,
+                                                          @"start"  : start,
+                                                          @"end"    : end,
                                                           @"color"  : color
                                                           };
     
@@ -209,13 +214,13 @@ NSDictionary *(^planetaryHourProviderData)(NSString *, NSString *, NSString *, U
 
 - (void)getPlaceholderTemplateForComplication:(CLKComplication *)complication withHandler:(void (^)(CLKComplicationTemplate * _Nullable))handler
 {
-    CLKComplicationTemplate *template = [self templateForComplication:complication.family providerData:planetaryHourProviderData(@"㊏", @"Earth", @"TERA", [UIColor greenColor])];
+    CLKComplicationTemplate *template = [self templateForComplication:complication.family providerData:planetaryHourProviderData(@"㊏", @"Earth", @"Hour 0", @"Hour 0", @"12:00 AM", @"12:00 AM", [UIColor greenColor])];
     handler(template);
 }
 
 - (void)getLocalizableSampleTemplateForComplication:(CLKComplication *)complication withHandler:(void (^)(CLKComplicationTemplate * _Nullable))handler
 {
-    CLKComplicationTemplate *template = [self templateForComplication:complication.family providerData:planetaryHourProviderData(@"㊏", @"Earth", @"TERA", [UIColor greenColor])];
+    CLKComplicationTemplate *template = [self templateForComplication:complication.family providerData:planetaryHourProviderData(@"㊏", @"Earth", @"Hour 0", @"Hour 0", @"12:00 AM", @"12:00 AM", [UIColor greenColor])];
     handler(template);
 }
 
@@ -227,7 +232,15 @@ NSDictionary *(^planetaryHourProviderData)(NSString *, NSString *, NSString *, U
         NSDateInterval *dateInterval = [[NSDateInterval alloc] initWithStartDate:startDate endDate:endDate];
         if ([dateInterval containsDate:[NSDate date]])
         {
-            template = [self templateForComplication:complication.family providerData:planetaryHourProviderData([symbol string], name, abbr, color)];
+            NSDateFormatter *startDateFormatter = [[NSDateFormatter alloc] init];
+            startDateFormatter.timeStyle        = NSDateFormatterShortStyle;
+            NSString *startDateString           = [startDateFormatter stringFromDate:startDate];
+            
+            NSDateFormatter *endDateFormatter   = [[NSDateFormatter alloc] init];
+            endDateFormatter.timeStyle          = NSDateFormatterShortStyle;
+            NSString *endDateString             = [endDateFormatter stringFromDate:endDate];
+            
+            template = [self templateForComplication:complication.family providerData:planetaryHourProviderData([symbol string], name, [NSString stringWithFormat:@"Hour %lu", (long)hour], abbr, startDateString, endDateString, color)];
             CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:startDate complicationTemplate:template] ;
             handler(tle);
         }
@@ -241,23 +254,30 @@ NSDictionary *(^planetaryHourProviderData)(NSString *, NSString *, NSString *, U
         __block NSMutableArray *entries = [NSMutableArray arrayWithCapacity:limit];
         __block CLKComplicationTemplate *template = nil;
         NSDateInterval *dateInterval = [[NSDateInterval alloc] initWithStartDate:date endDate:timelineEndDate];
-            [PlanetaryHourDataSource.sharedDataSource currentPlanetaryHoursForLocation:PlanetaryHourDataSource.sharedDataSource.locationManager.location forDate:date completionBlock:^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString *abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor *color, BOOL current) {
-                NSLog(@"Getting planetary hour data %ld", (long)hour);
-                if ([dateInterval containsDate:startDate] && entries.count < limit)
-                {
-                    template = [self templateForComplication:complication.family providerData:planetaryHourProviderData([symbol string], name, abbr, color)];
-                    CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:startDate complicationTemplate:template] ;
-                    [entries addObject:tle];
-                    if (hour == 23) {
-                        NSLog(@"Submitting %lu entries", (long)entries.count);
-                        handler(entries);
-                    }
+        [PlanetaryHourDataSource.sharedDataSource currentPlanetaryHoursForLocation:PlanetaryHourDataSource.sharedDataSource.locationManager.location forDate:date completionBlock:^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString *abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor *color, BOOL current) {
+            if ([dateInterval containsDate:startDate] && entries.count < limit)
+            {
+                NSDateFormatter *startDateFormatter = [[NSDateFormatter alloc] init];
+                startDateFormatter.timeStyle        = NSDateFormatterShortStyle;
+                NSString *startDateString           = [startDateFormatter stringFromDate:startDate];
+                
+                NSDateFormatter *endDateFormatter   = [[NSDateFormatter alloc] init];
+                endDateFormatter.timeStyle          = NSDateFormatterShortStyle;
+                NSString *endDateString             = [endDateFormatter stringFromDate:endDate];
+                
+                template = [self templateForComplication:complication.family providerData:planetaryHourProviderData([symbol string], name, [NSString stringWithFormat:@"Hour %lu", (long)hour], abbr, startDateString, endDateString, color)];
+                CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:startDate complicationTemplate:template] ;
+                [entries addObject:tle];
+                if (hour == 23) {
+                    handler(entries);
                 }
-            }];
+            }
         }];
+    }];
 }
 
 @end
+
 
 
 
