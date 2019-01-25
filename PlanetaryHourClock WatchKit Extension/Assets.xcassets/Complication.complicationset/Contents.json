@@ -6,6 +6,9 @@
       "role" : "circular"
     },
     {
+      "filename" : "Earth.imageset"
+    },
+    {
       "idiom" : "watch",
       "filename" : "Extra Large.imageset",
       "role" : "extra-large"

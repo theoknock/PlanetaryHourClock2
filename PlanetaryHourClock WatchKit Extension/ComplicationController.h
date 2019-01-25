@@ -7,6 +7,7 @@
 //
 
 #import <ClockKit/ClockKit.h>
+#import <UIKit/UIKit.h>
 
 @interface ComplicationController : NSObject <CLKComplicationDataSource>
 

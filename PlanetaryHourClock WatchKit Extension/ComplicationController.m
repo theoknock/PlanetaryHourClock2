@@ -12,24 +12,24 @@
 
 @implementation ComplicationController
 
-//- (UIImage *)imageFromText:(NSString *)text
-//{
-//    NSMutableParagraphStyle *centerAlignedParagraphStyle = [[NSMutableParagraphStyle alloc] init];
-//    centerAlignedParagraphStyle.alignment                = NSTextAlignmentCenter;
-//    NSDictionary *centerAlignedTextAttributes            = @{NSForegroundColorAttributeName : [UIColor grayColor],
-//                                                             NSFontAttributeName            : [UIFont systemFontOfSize:8.0 weight:UIFontWeightBold],
-//                                                             NSParagraphStyleAttributeName  : centerAlignedParagraphStyle};
-//
-//    CGSize size = [text sizeWithAttributes:centerAlignedTextAttributes];
-//    UIGraphicsBeginImageContext(size);
-//    [text drawAtPoint:CGPointZero withAttributes:centerAlignedTextAttributes];
-//
-//    CGContextSetShouldAntialias(UIGraphicsGetCurrentContext(), YES);
-//    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-//    UIGraphicsEndImageContext();
-//
-//    return image;
-//}
+UIImage *(^imageFromText)(NSString *) = ^(NSString *text)
+{
+    NSMutableParagraphStyle *centerAlignedParagraphStyle = [[NSMutableParagraphStyle alloc] init];
+    centerAlignedParagraphStyle.alignment                = NSTextAlignmentCenter;
+    NSDictionary *centerAlignedTextAttributes            = @{NSForegroundColorAttributeName : [UIColor grayColor],
+                                                             NSFontAttributeName            : [UIFont systemFontOfSize:64.0 weight:UIFontWeightBold],
+                                                             NSParagraphStyleAttributeName  : centerAlignedParagraphStyle};
+
+    CGSize size = [text sizeWithAttributes:centerAlignedTextAttributes];
+    UIGraphicsBeginImageContextWithOptions(size, NO, 0);
+    [text drawAtPoint:CGPointZero withAttributes:centerAlignedTextAttributes];
+
+    CGContextSetShouldAntialias(UIGraphicsGetCurrentContext(), YES);
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    return image;
+};
 
 #pragma mark - Timeline Configuration
 
@@ -143,10 +143,10 @@ CLKComplicationTemplateCircularSmallStackText *(^complicationTemplateCircularSma
     return template;
 };
 
-CLKComplicationTemplateExtraLargeRingImage *(^complicationTemplateExtraLargeRingImage)(UIImage *, CLKComplicationRingStyle, float, UIColor *) = ^(UIImage *image, CLKComplicationRingStyle ringStyle, float fillFraction, UIColor *color)
+CLKComplicationTemplateExtraLargeRingImage *(^complicationTemplateExtraLargeRingImage)(NSString *, CLKComplicationRingStyle, float, UIColor *) = ^(NSString *text, CLKComplicationRingStyle ringStyle, float fillFraction, UIColor *color)
 {
     CLKComplicationTemplateExtraLargeRingImage *template = [[CLKComplicationTemplateExtraLargeRingImage alloc] init];
-     template.imageProvider = [CLKImageProvider imageProviderWithOnePieceImage:[UIImage imageNamed:@"Complication/Untitled.png"]];
+    template.imageProvider = [CLKImageProvider imageProviderWithOnePieceImage:imageFromText(text)];  //[UIImage imageNamed:@"Complication/Earth.png"]];
     template.ringStyle = ringStyle;
     template.fillFraction = fillFraction;
     template.tintColor = color;
@@ -217,7 +217,7 @@ CLKComplicationTemplate *(^templateForComplication)(CLKComplicationFamily, NSDic
         {
 //            template = complicationTemplateExtraLargeSimpleText([data objectForKey:@"symbol"], [data objectForKey:@"color"]);
             long hour = [(NSNumber *)[data objectForKey:@"hour"] longValue] + 1;
-            float dayExpiry = SECONDS_PER_DAY / hour;
+            float dayExpiry = ((hour * 60) * 60) / SECONDS_PER_DAY;
             template = complicationTemplateExtraLargeRingImage([data objectForKey:@"symbol"], CLKComplicationRingStyleOpen, dayExpiry, [data objectForKey:@"color"]);
             break;
         }
