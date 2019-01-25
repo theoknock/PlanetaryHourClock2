@@ -2,25 +2,25 @@
   "images" : [
     {
       "idiom" : "watch",
-      "filename" : "Untitled-1.png",
+      "filename" : "Earth-182x182.png",
       "screen-width" : "<=145",
       "scale" : "2x"
     },
     {
       "idiom" : "watch",
-      "filename" : "Untitled-2.png",
+      "filename" : "Earth-203x203-1.png",
       "screen-width" : ">161",
       "scale" : "2x"
     },
     {
       "idiom" : "watch",
-      "filename" : "Untitled-3.png",
+      "filename" : "Earth-203x203.png",
       "screen-width" : ">145",
       "scale" : "2x"
     },
     {
       "idiom" : "watch",
-      "filename" : "Untitled.png",
+      "filename" : "Earth-224x224.png",
       "screen-width" : ">183",
       "scale" : "2x"
     }
