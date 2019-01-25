@@ -281,7 +281,6 @@ NSArray<NSDate *> *(^calculateSolarData)(NSDate *, CLLocationCoordinate2D) = ^(N
 
 #pragma mark - Planetary Hour Calculation definitions and enumerations
 
-#define SECONDS_PER_DAY 86400.00f
 #define HOURS_PER_SOLAR_TRANSIT 12
 #define HOURS_PER_DAY 24
 #define NUMBER_OF_PLANETS 7
@@ -508,29 +507,32 @@ NSAttributedString *(^attributedPlanetSymbol)(NSString *) = ^(NSString *symbol) 
         components.day = -1;
         NSDate *yesterday = [calendar dateByAddingComponents:components toDate:date options:NSCalendarMatchNextTimePreservingSmallerUnits];
         NSArray<NSDate *> *newSolarTransits = calculateSolarData(yesterday, location.coordinate);
+        
         return newSolarTransits;
     } else {
+        // No changes to date necessary
         return solarTransits;
     }
 }
 
-NSArray<NSNumber *> *(^hourDurations)(NSTimeInterval) = ^(NSTimeInterval daySpan)
+NSArray<NSNumber *> *(^planetaryHourDurations)(NSDate *, NSDate *, NSDate *) = ^(NSDate *sunrise, NSDate *sunset, NSDate *nextSunrise)
 {
-    NSTimeInterval dayHourDuration = daySpan / HOURS_PER_SOLAR_TRANSIT;
-    NSTimeInterval nightSpan = fabs(SECONDS_PER_DAY - daySpan);
-    NSTimeInterval nightHourDuration = nightSpan / HOURS_PER_SOLAR_TRANSIT;
-    NSArray<NSNumber *> *hourDurations = @[[NSNumber numberWithDouble:dayHourDuration], [NSNumber numberWithDouble:nightHourDuration]];
+    NSTimeInterval daySpan             = [sunset timeIntervalSinceDate:sunrise];
+    NSTimeInterval dayHourLength       = (daySpan / HOURS_PER_SOLAR_TRANSIT);
+    NSTimeInterval nightSpan           = [nextSunrise timeIntervalSinceDate:sunset];
+    NSTimeInterval nightHourLength     = (nightSpan / HOURS_PER_SOLAR_TRANSIT);
+    NSArray<NSNumber *> *hourDurations = @[[NSNumber numberWithDouble:dayHourLength], [NSNumber numberWithDouble:nightHourLength]];
     
     return hourDurations;
 };
 
 - (void)currentPlanetaryHoursForLocation:(CLLocation *)location forDate:(NSDate *)date completionBlock:(PlanetaryHourCompletionBlock)planetaryHour;
 {
-    NSArray<NSDate *> *solarTransits = [self solarCalculationForDate:date location:location];
-    NSTimeInterval daySpan         = [solarTransits[Sunset] timeIntervalSinceDate:solarTransits[Sunrise]];
-    NSArray<NSNumber *> *durations = hourDurations(daySpan);
+    NSArray<NSDate *> *solarTransits     = [self solarCalculationForDate:date location:location];
+    NSArray<NSDate *> *nextSolarTransits = [self solarCalculationForDate:[date dateByAddingTimeInterval:SECONDS_PER_DAY] location:location];
+    NSArray<NSNumber *> *durations       = planetaryHourDurations(solarTransits[Sunrise], solarTransits[Sunset], nextSolarTransits[Sunrise]);
     
-    __block NSInteger hour         = 0;
+    __block NSInteger hour = 0;
     __block dispatch_block_t planetaryHoursDictionaries;
     
     void(^planetaryHoursDictionary)(void) = ^(void) {
