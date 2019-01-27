@@ -7,6 +7,7 @@
 //
 
 #import <WatchKit/WatchKit.h>
+#import "PlanetaryHourDataSource.h"
 
 @interface ExtensionDelegate : NSObject <WKExtensionDelegate>
 

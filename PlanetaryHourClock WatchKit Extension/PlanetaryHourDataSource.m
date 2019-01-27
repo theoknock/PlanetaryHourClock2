@@ -26,6 +26,28 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
     return sharedDataSource;
 }
 
+- (UIImage * _Nonnull (^)(NSString * _Nonnull, UIColor * _Nullable, float))imageFromText
+{
+    return ^(NSString *text, UIColor *color, float size)
+    {
+        NSMutableParagraphStyle *centerAlignedParagraphStyle = [[NSMutableParagraphStyle alloc] init];
+        centerAlignedParagraphStyle.alignment                = NSTextAlignmentCenter;
+        NSDictionary *centerAlignedTextAttributes            = @{NSForegroundColorAttributeName : (!color) ? [UIColor redColor] : color,
+                                                                 NSFontAttributeName            : [UIFont systemFontOfSize:size weight:UIFontWeightBold],
+                                                                 NSParagraphStyleAttributeName  : centerAlignedParagraphStyle};
+        
+        CGSize textSize = [text sizeWithAttributes:centerAlignedTextAttributes];
+        UIGraphicsBeginImageContextWithOptions(textSize, NO, 0);
+        [text drawAtPoint:CGPointZero withAttributes:centerAlignedTextAttributes];
+        
+        CGContextSetShouldAntialias(UIGraphicsGetCurrentContext(), YES);
+        UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        
+        return image;
+    };
+}
+
 - (instancetype)init
 {
     if (self == [super init])
@@ -281,8 +303,6 @@ NSArray<NSDate *> *(^calculateSolarData)(NSDate *, CLLocationCoordinate2D) = ^(N
 
 #pragma mark - Planetary Hour Calculation definitions and enumerations
 
-#define HOURS_PER_SOLAR_TRANSIT 12
-#define HOURS_PER_DAY 24
 #define NUMBER_OF_PLANETS 7
 
 typedef NS_ENUM(NSUInteger, Planet) {

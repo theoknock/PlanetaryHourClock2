@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="krG-kh-mPi" pageOrientation="vertical">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="Xfn-Go-AEQ" pageOrientation="vertical">
     <device id="watch44" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -9,6 +9,20 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14460.16"/>
     </dependencies>
     <scenes>
+        <!--Map Interface Controller-->
+        <scene sceneID="MHZ-zS-PYE">
+            <objects>
+                <controller animationDuration="1" fullBounds="YES" fullScreen="YES" id="Xfn-Go-AEQ" customClass="MapInterfaceController">
+                    <items>
+                        <map width="1" height="1" alignment="center" verticalAlignment="center" id="n4N-TQ-eww"/>
+                    </items>
+                    <connections>
+                        <outlet property="map" destination="n4N-TQ-eww" id="k6H-d2-ai1"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="-103" y="118"/>
+        </scene>
         <!--Table Interface Controller-->
         <scene sceneID="hJs-A1-ru7">
             <objects>

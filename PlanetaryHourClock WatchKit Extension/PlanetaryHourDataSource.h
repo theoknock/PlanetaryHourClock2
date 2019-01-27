@@ -14,6 +14,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 #define SECONDS_PER_DAY 86400.00f
+#define HOURS_PER_DAY 24
+#define HOURS_PER_SOLAR_TRANSIT 12
 
 typedef NS_ENUM(NSUInteger, SolarTransit) {
     Sunrise,
@@ -40,6 +42,9 @@ typedef void(^PlanetaryHoursRangeCompletionBlock)(NSRange planetaryHoursRange);
 
 - (void)currentPlanetaryHoursForLocation:(CLLocation *)location forDate:(NSDate *)date completionBlock:(PlanetaryHourCompletionBlock)planetaryHour;
 - (NSArray<NSDate *> *)solarCalculationForDate:(NSDate *)date location:(CLLocation *)location;
+
+@property (strong, nonatomic) NSArray<NSNumber *> *(^planetaryHourDurations)(NSDate *sunrise, NSDate *sunset, NSDate *nextSunrise);
+@property (strong, nonatomic) UIImage *(^imageFromText)(NSString *text, UIColor * _Nullable color, float size);
 
 @end
 

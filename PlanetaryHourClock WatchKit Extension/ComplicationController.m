@@ -7,55 +7,31 @@
 //
 
 #import "ComplicationController.h"
+#import "ExtensionDelegate.h"
 #import "PlanetaryHourDataSource.h"
 
 
 @implementation ComplicationController
 
-UIImage *(^imageFromText)(NSString *) = ^(NSString *text)
-{
-    NSMutableParagraphStyle *centerAlignedParagraphStyle = [[NSMutableParagraphStyle alloc] init];
-    centerAlignedParagraphStyle.alignment                = NSTextAlignmentCenter;
-    NSDictionary *centerAlignedTextAttributes            = @{NSForegroundColorAttributeName : [UIColor grayColor],
-                                                             NSFontAttributeName            : [UIFont systemFontOfSize:64.0 weight:UIFontWeightBold],
-                                                             NSParagraphStyleAttributeName  : centerAlignedParagraphStyle};
-
-    CGSize size = [text sizeWithAttributes:centerAlignedTextAttributes];
-    UIGraphicsBeginImageContextWithOptions(size, NO, 0);
-    [text drawAtPoint:CGPointZero withAttributes:centerAlignedTextAttributes];
-
-    CGContextSetShouldAntialias(UIGraphicsGetCurrentContext(), YES);
-    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-
-    return image;
-};
-
 #pragma mark - Timeline Configuration
-
-NSDate *(^solarTransitDate)(NSDate *, SolarTransit) = ^(NSDate *date, SolarTransit solarTransit)
-{
-    NSArray<NSDate *> *solarTransits = [PlanetaryHourDataSource.sharedDataSource solarCalculationForDate:date location:PlanetaryHourDataSource.sharedDataSource.locationManager.location];
-    
-    return solarTransits[solarTransit];
-};
 
 - (void)getSupportedTimeTravelDirectionsForComplication:(CLKComplication *)complication withHandler:(void(^)(CLKComplicationTimeTravelDirections directions))handler {
     handler(CLKComplicationTimeTravelDirectionForward);
 }
 
 - (void)getTimelineStartDateForComplication:(CLKComplication *)complication withHandler:(void(^)(NSDate * __nullable date))handler {
-    handler(solarTransitDate([NSDate date], Sunrise));
+    handler([[PlanetaryHourDataSource sharedDataSource] solarCalculationForDate:[NSDate date] location:PlanetaryHourDataSource.sharedDataSource.locationManager.location][Sunrise]);
 }
 
 - (void)getTimelineEndDateForComplication:(CLKComplication *)complication withHandler:(void(^)(NSDate * __nullable date))handler {
-    NSDate *date = [NSDate date];
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSDateComponents *components = [[NSDateComponents alloc] init];
-    components.day = 1;
-    NSDate *tomorrow = [calendar dateByAddingComponents:components toDate:date options:NSCalendarMatchNextTimePreservingSmallerUnits];
-    
-    handler(solarTransitDate(tomorrow, Sunrise));
+//    NSDate *date = [NSDate date];
+//    NSCalendar *calendar = [NSCalendar currentCalendar];
+//    NSDateComponents *components = [[NSDateComponents alloc] init];
+//    components.day = 1;
+//    NSDate *tomorrow = [calendar dateByAddingComponents:components toDate:date options:NSCalendarMatchNextTimePreservingSmallerUnits];
+//
+//    handler(solarTransitDate(tomorrow, Sunrise));
+    handler([NSDate distantFuture]);
 }
 
 - (void)getPrivacyBehaviorForComplication:(CLKComplication *)complication withHandler:(void(^)(CLKComplicationPrivacyBehavior privacyBehavior))handler {
@@ -146,7 +122,7 @@ CLKComplicationTemplateCircularSmallStackText *(^complicationTemplateCircularSma
 CLKComplicationTemplateExtraLargeRingImage *(^complicationTemplateExtraLargeRingImage)(NSString *, CLKComplicationRingStyle, float, UIColor *) = ^(NSString *text, CLKComplicationRingStyle ringStyle, float fillFraction, UIColor *color)
 {
     CLKComplicationTemplateExtraLargeRingImage *template = [[CLKComplicationTemplateExtraLargeRingImage alloc] init];
-    template.imageProvider = [CLKImageProvider imageProviderWithOnePieceImage:imageFromText(text)];  //[UIImage imageNamed:@"Complication/Earth.png"]];
+    template.imageProvider = [CLKImageProvider imageProviderWithOnePieceImage:[[PlanetaryHourDataSource sharedDataSource] imageFromText](text, color, 72.0)];
     template.ringStyle = ringStyle;
     template.fillFraction = fillFraction;
     template.tintColor = color;
@@ -170,7 +146,7 @@ CLKComplicationTemplateGraphicCornerGaugeText *(^complicationTemplateGraphicCorn
     template.outerTextProvider = [CLKSimpleTextProvider textProviderWithText:text];
     NSDate *earlierDate = [startDate earlierDate:endDate];
     NSDate *laterDate   = ([earlierDate isEqualToDate:startDate]) ? endDate : startDate;
-    template.gaugeProvider = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:CLKGaugeProviderStyleRing gaugeColors:@[tintColor, [UIColor whiteColor]] gaugeColorLocations:@[[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:1.0]] startDate:earlierDate startFillFraction:0.0 endDate:laterDate endFillFraction:1.0];
+    template.gaugeProvider = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:CLKGaugeProviderStyleRing gaugeColors:@[tintColor, [UIColor blackColor]] gaugeColorLocations:@[[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:66.6]] startDate:earlierDate startFillFraction:0.0 endDate:laterDate endFillFraction:1.0];
     
     return template;
 };
@@ -262,9 +238,8 @@ CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKCompli
 {
     NSNumber *hour = [NSNumber numberWithInteger:0];
     NSString *hourString = [NSString stringWithFormat:@"Hour %@", hour];
-    NSDate *startDate = solarTransitDate([NSDate date], Sunrise);
-    NSDate *endDate   = solarTransitDate([NSDate date], Sunset);
-    CLKComplicationTemplate *template = templateForComplication(complication.family, planetaryHourProviderData(@"㊏", @"Earth", hour, hourString, startDate, endDate, [UIColor greenColor]));
+    NSArray<NSDate *> *solarTransits = [[PlanetaryHourDataSource sharedDataSource] solarCalculationForDate:[NSDate date] location:PlanetaryHourDataSource.sharedDataSource.locationManager.location];
+    CLKComplicationTemplate *template = templateForComplication(complication.family, planetaryHourProviderData(@"㊏", @"Earth", hour, hourString, solarTransits[Sunrise], solarTransits[Sunset], [UIColor greenColor]));
     
     return template;
 };

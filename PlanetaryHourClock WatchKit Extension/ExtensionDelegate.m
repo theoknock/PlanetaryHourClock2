@@ -16,9 +16,6 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"PlanetaryHoursDataSourceUpdatedNotification"
                                                         object:[[PlanetaryHourDataSource.sharedDataSource locationManager] location]
                                                       userInfo:nil];
-    [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
-    }];
 }
 
 - (void)applicationDidBecomeActive {
