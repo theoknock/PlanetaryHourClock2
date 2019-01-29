@@ -13,6 +13,7 @@
 @interface MapInterfaceController ()
 {
     dispatch_source_t annotationUpdateTimer;
+    MKCoordinateSpan span;
 }
 
 @end
@@ -31,77 +32,41 @@
 - (void)setUserLocation:(CLLocation *)userLocation
 {
     _userLocation = userLocation;
-    MKCoordinateRegion visibleRegion = MKCoordinateRegionMake(_userLocation.coordinate, MKCoordinateRegionForMapRect(MKMapRectWorld).span);
-    [self.map setRegion:visibleRegion];
+    NSLog(@"User location: %f, %f", userLocation.coordinate.latitude, userLocation.coordinate.longitude);
+//    MKCoordinateRegion visibleRegion = MKCoordinateRegionMake(_userLocation.coordinate, MKCoordinateSpanMake(0.05, 0.05));
+//    [self.map setRegion:visibleRegion];
 }
-
-#pragma mark - Planetary-hour annotations methods
-
-NSDate *(^solarTransitDate)(NSDate *, SolarTransit) = ^(NSDate *date, SolarTransit solarTransit)
-{
-    NSArray<NSDate *> *solarTransits = [PlanetaryHourDataSource.sharedDataSource solarCalculationForDate:date location:PlanetaryHourDataSource.sharedDataSource.locationManager.location];
-    
-    return solarTransits[solarTransit];
-};
-
-CLLocation *(^locatePlanetaryHour)(CLLocation * _Nullable, NSDate * _Nullable, NSTimeInterval, NSUInteger) = ^(CLLocation * _Nullable location, NSDate * _Nullable date, NSTimeInterval timeOffset, NSUInteger hour) {
-    if (!date) date = [NSDate date];
-    hour = hour % HOURS_PER_DAY;
-    NSArray<NSDate *> *solarTransits     = [[PlanetaryHourDataSource sharedDataSource] solarCalculationForDate:date location:location];
-    NSArray<NSDate *> *nextSolarTransits = [[PlanetaryHourDataSource sharedDataSource] solarCalculationForDate:[date dateByAddingTimeInterval:SECONDS_PER_DAY] location:location];
-    NSTimeInterval seconds_in_day        = [solarTransits[Sunset] timeIntervalSinceDate:solarTransits[Sunrise]];
-    NSTimeInterval seconds_in_night      = [solarTransits[Sunrise] timeIntervalSinceDate:nextSolarTransits[Sunrise]];
-    double meters_per_second             = MKMapSizeWorld.width / SECONDS_PER_DAY;
-    double meters_per_day                = seconds_in_day   * meters_per_second;
-    double meters_per_night              = seconds_in_night * meters_per_second;
-    double meters_per_day_per_hour       = meters_per_day / HOURS_PER_SOLAR_TRANSIT;
-    double meters_per_night_per_hour     = meters_per_night / HOURS_PER_SOLAR_TRANSIT;
-    
-    MKMapPoint user_location_point = MKMapPointForCoordinate(location.coordinate);
-    MKMapPoint planetary_hour_origin = MKMapPointMake((hour < HOURS_PER_SOLAR_TRANSIT)
-                                                      ? user_location_point.x + (meters_per_day_per_hour * hour)
-                                                      : user_location_point.x + (meters_per_day + (meters_per_night_per_hour * (hour % 12))), user_location_point.y);
-    planetary_hour_origin = MKMapPointMake(planetary_hour_origin.x - (timeOffset * meters_per_second), planetary_hour_origin.y);
-    CLLocationCoordinate2D start_coordinate = MKCoordinateForMapPoint(planetary_hour_origin);
-    CLLocation *planetaryHourLocation = [[CLLocation alloc] initWithLatitude:start_coordinate.latitude longitude:start_coordinate.longitude];
-    
-    return planetaryHourLocation;
-};
-
 
 #pragma mark - WKInterfaceController methods
 
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
     
-    // Configure interface objects here.
+    // Map zoom control setup
+    [self.crownSequencer setDelegate:self];
+    [self.crownSequencer focus];
+    
+    // Annotations location update timer
     annotationUpdateTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
     dispatch_source_set_timer(annotationUpdateTimer, DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC, 1.0 * NSEC_PER_SEC);
     dispatch_source_set_event_handler(annotationUpdateTimer, ^{
+        CLLocation *userLocation = PlanetaryHourDataSource.sharedDataSource.locationManager.location;
         [self.map removeAllAnnotations];
-        for (int hour = 0; hour < 5; hour++)
+        [self.map addAnnotation:userLocation.coordinate withPinColor:WKInterfaceMapPinColorPurple];
+        [PlanetaryHourDataSource.sharedDataSource planetaryHours](userLocation, [NSDate date], ^(NSAttributedString *symbol, NSString *name, NSString *abbr, NSDate *startDate, NSDate *endDate, NSInteger hour, UIColor *color, CLLocation *location, CLLocationDistance length_meters, BOOL current)
         {
-            NSTimeInterval timeOffset = [[NSDate date] timeIntervalSinceDate:[PlanetaryHourDataSource.sharedDataSource solarCalculationForDate:[NSDate date] location:PlanetaryHourDataSource.sharedDataSource.locationManager.location][Sunrise]];
-            CLLocationCoordinate2D planetaryHourCoordinate = locatePlanetaryHour(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], timeOffset, hour).coordinate;
-//            NSLog(@"Hour %d (%f, %f)", hour, planetaryHourCoordinate.latitude, planetaryHourCoordinate.longitude);
-            [self.map addAnnotation:planetaryHourCoordinate withImage:[[PlanetaryHourDataSource sharedDataSource] imageFromText]([NSString stringWithFormat:@"%ld", (long)hour], nil, 9.0) centerOffset:CGPointZero];
-        }
+            [self.map addAnnotation:location.coordinate withImage:PlanetaryHourDataSource.sharedDataSource.imageFromText([symbol string], color, 36.0) centerOffset:CGPointZero];
+        });
     });
-    [[NSNotificationCenter defaultCenter] addObserverForName:@"PlanetaryHoursDataSourceUpdatedNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
-        NSLog(@"Received posted notification PlanetaryHoursDataSourceUpdatedNotification");
+    dispatch_resume(annotationUpdateTimer);
     
+    // Location updates notification observer
+    [[NSNotificationCenter defaultCenter] addObserverForName:@"PlanetaryHoursDataSourceUpdatedNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
         [self setUserLocation:(CLLocation *)note.object];
         [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
         }];
     }];
-    
-    dispatch_resume(annotationUpdateTimer);
-    
-    
-    
-    [self.crownSequencer setDelegate:self];
-    [self.crownSequencer focus];
 }
 
 - (void)willActivate {
@@ -118,16 +83,38 @@ CLLocation *(^locatePlanetaryHour)(CLLocation * _Nullable, NSDate * _Nullable, N
 
 - (void)crownDidRotate:(WKCrownSequencer *)crownSequencer rotationalDelta:(double)rotationalDelta
 {
-    [self setUserLocation:[[CLLocation alloc]
-                           initWithCoordinate:CLLocationCoordinate2DMake(_userLocation.coordinate.latitude, _userLocation.coordinate.longitude + (rotationalDelta * 10.0))
-                           altitude:0.0
-                           horizontalAccuracy:kCLLocationAccuracyBest
-                           verticalAccuracy:kCLLocationAccuracyBest
-                           timestamp:[NSDate date]]];
-//    NSLog(@"rotational delta\t%f\t\t%f\t%f", rotationalDelta, _currentLocation.coordinate.latitude, _currentLocation.coordinate.longitude);
+//    [self setUserLocation:[[CLLocation alloc]
+//                           initWithCoordinate:CLLocationCoordinate2DMake(_userLocation.coordinate.latitude, _userLocation.coordinate.longitude + (rotationalDelta * 10.0))
+//                           altitude:0.0
+//                           horizontalAccuracy:kCLLocationAccuracyBest
+//                           verticalAccuracy:kCLLocationAccuracyBest
+//                           timestamp:[NSDate date]]];
+    CLLocation *userLocation = PlanetaryHourDataSource.sharedDataSource.locationManager.location;
+    
+    
+    span.latitudeDelta  += ((rotationalDelta * rotationalDelta) * (rotationalDelta)) + (span.latitudeDelta * rotationalDelta);
+    span.longitudeDelta += ((rotationalDelta * rotationalDelta) * (rotationalDelta)) + (span.longitudeDelta * rotationalDelta);
+    span.latitudeDelta   = (span.latitudeDelta < 0) ? 0  : (span.latitudeDelta  > MKCoordinateRegionForMapRect(MKMapRectWorld).span.latitudeDelta)  ? MKCoordinateRegionForMapRect(MKMapRectWorld).span.latitudeDelta  : span.latitudeDelta;
+    span.longitudeDelta  = (span.longitudeDelta < 0) ? 0 : (span.longitudeDelta > MKCoordinateRegionForMapRect(MKMapRectWorld).span.longitudeDelta) ? MKCoordinateRegionForMapRect(MKMapRectWorld).span.longitudeDelta : span.longitudeDelta;
+    
+    MKCoordinateRegion visibleRegion = MKCoordinateRegionMake(PlanetaryHourDataSource.sharedDataSource.locationManager.location.coordinate, span);
+    
+    [self.map setRegion:visibleRegion];
+    
+    
+//    [self.map setVisibleMapRect:MKMapRectMake(MKMapPointForCoordinate(userLocation.coordinate).x, MKMapPointForCoordinate(userLocation.coordinate).y, span.latitudeDelta, span.longitudeDelta)];
+//    span.latitudeDelta  += MKMapSizeWorld.width * rotationalDelta;
+//    span.longitudeDelta += MKMapSizeWorld.height * rotationalDelta;
+//    span.latitudeDelta   = (span.latitudeDelta  < 0) ? 0  : (span.latitudeDelta  > MKMapSizeWorld.width)  ? MKMapSizeWorld.width  : span.latitudeDelta;
+//    span.longitudeDelta  = (span.longitudeDelta < 0) ? 0  : (span.longitudeDelta > MKMapSizeWorld.height) ? MKMapSizeWorld.height : span.longitudeDelta;
+//    MKMapRect mapRect = MKMapRectMake(userLocationMapPoint.x, userLocationMapPoint.y, span.latitudeDelta, span.longitudeDelta);
+//    [self.map setRegion:MKCoordinateRegionForMapRect(mapRect)];
+//    [self.map setVisibleMapRect:mapRect];
+    NSLog(@"rotational delta\t%f\t\tspan\t%f %f", rotationalDelta, span.latitudeDelta, span.longitudeDelta);
 }
 
 @end
+
 
 
 
