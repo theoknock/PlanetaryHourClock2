@@ -244,7 +244,7 @@ CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKCompli
 
 - (void)getCurrentTimelineEntryForComplication:(CLKComplication *)complication withHandler:(void(^)(CLKComplicationTimelineEntry * __nullable))handler {
     __block CLKComplicationTemplate *template = nil;
-    PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, BOOL current) {
+    PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
         NSDateInterval *dateInterval = [[NSDateInterval alloc] initWithStartDate:startDate endDate:endDate];
         if ([dateInterval containsDate:[NSDate date]])
         {
@@ -264,7 +264,7 @@ CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKCompli
         __block CLKComplicationTemplate *template = nil;
     
         NSDateInterval *dateInterval = [[NSDateInterval alloc] initWithStartDate:date endDate:timelineEndDate];
-        PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, BOOL current) {
+        PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
             if ([dateInterval containsDate:startDate] && entries.count < limit)
             {
                 template = templateForComplication(complication.family,

@@ -27,7 +27,7 @@ typedef NS_ENUM(NSUInteger, PlanetaryHoursTimelineDirection) {
     PlanetaryHoursTimelineDirectionBackward
 };
 
-typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString *name, NSString *abbr, NSDate *startDate, NSDate *endDate, NSInteger hour, UIColor *color, CLLocation *location, CLLocationDistance length_meters, BOOL current);
+typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString *name, NSString *abbr, NSDate *startDate, NSDate *endDate, NSInteger hour, UIColor *color, CLLocation *location, CLLocationDistance distance, BOOL current);
 
 @interface PlanetaryHourDataSource : NSObject <CLLocationManagerDelegate>
 {
@@ -41,9 +41,9 @@ typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString
 
 @property (strong, nonatomic) void (^planetaryHours)(CLLocation *location, NSDate *date, PlanetaryHourCompletionBlock planetaryHour);
 @property (strong, nonatomic) NSArray<NSNumber *> *(^planetaryHourDurations)(NSDate *sunrise, NSDate *sunset, NSDate *nextSunrise);
-@property (strong, nonatomic) UIImage *(^imageFromText)(NSString *text, UIColor * _Nullable color, float size);
+@property (strong, nonatomic) UIImage *(^imageFromText)(NSString *text, UIColor * _Nullable color, CGFloat fontsize);
 @property (strong, nonatomic) NSDictionary *(^planetaryHourData)(NSString *symbol, NSString *name, NSNumber *hour, NSString *abbr, NSDate *start, NSDate *end, UIColor *color);
-@property (strong, nonatomic) CLLocation *(^locatePlanetaryHour)(CLLocation * _Nullable location, NSDate * _Nullable date, double meters_per_second, double meters_per_day, double meters_per_day_per_hour, double meters_per_night_per_hour, NSTimeInterval timeOffset, NSUInteger hour);
+@property (strong, nonatomic) CLLocation *(^locatePlanetaryHour)(CLLocation * _Nullable location, NSDate * _Nullable date, double meters_per_second, double meters_per_day, double meters_per_day_hour, double meters_per_night_hour, NSTimeInterval timeOffset, NSUInteger hour);
 @property (strong, nonatomic) NSArray<NSDate *> *(^solarTransits)(NSDate *date, CLLocation *location);
 
 @end

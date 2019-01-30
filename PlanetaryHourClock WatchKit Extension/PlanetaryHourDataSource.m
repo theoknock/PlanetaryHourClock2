@@ -28,13 +28,14 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
 
 - (UIImage * _Nonnull (^)(NSString * _Nonnull, UIColor * _Nullable, float))imageFromText
 {
-    return ^(NSString *text, UIColor *color, float size)
+    return ^(NSString *text, UIColor *color, CGFloat fontsize)
     {
         NSMutableParagraphStyle *centerAlignedParagraphStyle = [[NSMutableParagraphStyle alloc] init];
         centerAlignedParagraphStyle.alignment                = NSTextAlignmentCenter;
         NSDictionary *centerAlignedTextAttributes            = @{NSForegroundColorAttributeName : (!color) ? [UIColor redColor] : color,
-                                                                 NSFontAttributeName            : [UIFont systemFontOfSize:size weight:UIFontWeightBold],
-                                                                 NSParagraphStyleAttributeName  : centerAlignedParagraphStyle};
+                                                                 NSParagraphStyleAttributeName  : centerAlignedParagraphStyle,
+                                                                 NSFontAttributeName            : [UIFont systemFontOfSize:fontsize weight:UIFontWeightBlack]
+                                                                 };
         
         CGSize textSize = [text sizeWithAttributes:centerAlignedTextAttributes];
         UIGraphicsBeginImageContextWithOptions(textSize, NO, 0);
@@ -569,16 +570,17 @@ NSArray<NSNumber *> *(^planetaryHourDurations)(NSDate *, NSDate *, NSDate *) = ^
 
 - (CLLocation * _Nonnull (^)(CLLocation * _Nullable, NSDate * _Nullable, double, double, double, double, NSTimeInterval, NSUInteger))locatePlanetaryHour
 {
-    return ^(CLLocation * _Nullable location, NSDate * _Nullable date, double meters_per_second, double meters_per_day, double meters_per_day_per_hour, double meters_per_night_per_hour, NSTimeInterval timeOffset, NSUInteger hour)
+    return ^(CLLocation * _Nullable location, NSDate * _Nullable date, double meters_per_second, double meters_per_day, double meters_per_day_hour, double meters_per_night_hour, NSTimeInterval timeOffset, NSUInteger hour)
     {
         MKMapPoint user_location_point = MKMapPointForCoordinate(location.coordinate);
-        MKMapPoint planetary_hour_origin = MKMapPointMake((hour < HOURS_PER_SOLAR_TRANSIT)
-                                                          ? user_location_point.x + (meters_per_day_per_hour * hour)
-                                                          : user_location_point.x + (meters_per_day + (meters_per_night_per_hour * (hour % 12))), user_location_point.y);
-        planetary_hour_origin = MKMapPointMake(planetary_hour_origin.x - (timeOffset * meters_per_second), planetary_hour_origin.y);
+        MKMapPoint planetary_hour_origin = MKMapPointMake(((hour < HOURS_PER_SOLAR_TRANSIT)
+                                                          ? user_location_point.x + (meters_per_day_hour * hour)
+                                                          : user_location_point.x + (meters_per_day + (meters_per_night_hour * (hour % 12))))
+                                                          - (timeOffset * meters_per_second),
+                                                          user_location_point.y);
         CLLocationCoordinate2D start_coordinate = MKCoordinateForMapPoint(planetary_hour_origin);
         CLLocation *planetaryHourLocation = [[CLLocation alloc] initWithLatitude:start_coordinate.latitude longitude:start_coordinate.longitude];
-        
+
         return planetaryHourLocation;
     };
 };
@@ -591,14 +593,19 @@ NSArray<NSNumber *> *(^planetaryHourDurations)(NSDate *, NSDate *, NSDate *) = ^
         NSArray<NSDate *> *nextSolarTransits = PlanetaryHourDataSource.sharedDataSource.solarTransits([date dateByAddingTimeInterval:SECONDS_PER_DAY], location);
         NSArray<NSNumber *> *durations       = planetaryHourDurations(solarTransits[Sunrise], solarTransits[Sunset], nextSolarTransits[Sunrise]);
         
+        // time
         NSTimeInterval seconds_in_day        = [solarTransits[Sunset] timeIntervalSinceDate:solarTransits[Sunrise]];
-//        NSTimeInterval seconds_in_night       = SECONDS_PER_DAY - seconds_in_day;
-        NSTimeInterval seconds_in_night      = [nextSolarTransits[Sunrise] timeIntervalSinceDate:solarTransits[Sunrise]];
-        double meters_per_second             = MKMapSizeWorld.width / SECONDS_PER_DAY;
+        NSTimeInterval seconds_in_night      = [nextSolarTransits[Sunrise] timeIntervalSinceDate:solarTransits[Sunset]];
+        NSTimeInterval seconds_per_day       = seconds_in_day + seconds_in_night;
+        // distance
+        double map_points_per_second         = MKMapSizeWorld.width / seconds_per_day;
+        double meters_per_second             = MKMetersPerMapPointAtLatitude(location.coordinate.latitude) * map_points_per_second;
         double meters_per_day                = seconds_in_day   * meters_per_second;
         double meters_per_night              = seconds_in_night * meters_per_second;
-        double meters_per_day_per_hour       = meters_per_day / HOURS_PER_SOLAR_TRANSIT;
-        double meters_per_night_per_hour     = meters_per_night / HOURS_PER_SOLAR_TRANSIT;
+
+        double meters_per_day_hour           = meters_per_day   / HOURS_PER_SOLAR_TRANSIT;
+        double meters_per_night_hour         = meters_per_night / HOURS_PER_SOLAR_TRANSIT;
+        
         NSTimeInterval timeOffset            = [date timeIntervalSinceDate:solarTransits[Sunrise]];
         
         __block NSInteger hour = 0;
@@ -617,9 +624,9 @@ NSArray<NSNumber *> *(^planetaryHourDurations)(NSDate *, NSDate *, NSDate *) = ^
             NSString *name                    = planetNameForHour(solarTransits[Sunrise], hour);
             NSString *abbr                    = planetAbbreviatedNameForPlanet(name);
             UIColor *color                    = colorForPlanetSymbol([symbol string]);
-            CLLocation *coordinate            = PlanetaryHourDataSource.sharedDataSource.locatePlanetaryHour(location, date, meters_per_second, meters_per_day, meters_per_day_per_hour, meters_per_night_per_hour, timeOffset, hour);
+            CLLocation *coordinate            = PlanetaryHourDataSource.sharedDataSource.locatePlanetaryHour(location, date, meters_per_second, meters_per_day, meters_per_day_hour, meters_per_night_hour, timeOffset, hour);
             planetaryHour(symbol, name, abbr, startDate, endDate, hour, color, coordinate,
-                          (CLLocationDistance)((meridian == AM) ? meters_per_day_per_hour : meters_per_night_per_hour),
+                          (CLLocationDistance)((meridian == AM) ? meters_per_day_hour : meters_per_night_hour),
                           ([dateInterval containsDate:date]) ? YES : NO);
             
             hour++;
