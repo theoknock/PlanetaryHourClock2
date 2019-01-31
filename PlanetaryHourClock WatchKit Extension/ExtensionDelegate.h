@@ -11,4 +11,6 @@
 
 @interface ExtensionDelegate : NSObject <WKExtensionDelegate>
 
+- (void)switchControllers;
+
 @end

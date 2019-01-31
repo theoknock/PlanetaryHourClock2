@@ -7,6 +7,7 @@
 //
 
 #import "TableInterfaceController.h"
+#import "ExtensionDelegate.h"
 #import "PlanetaryHourDataSource.h"
 #import "PlanetaryHourRowController.h"
 #import "NotificationController.h"
@@ -18,6 +19,11 @@
 @end
 
 @implementation TableInterfaceController
+
+- (IBAction)displayMap
+{
+    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] switchControllers];
+}
 
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];

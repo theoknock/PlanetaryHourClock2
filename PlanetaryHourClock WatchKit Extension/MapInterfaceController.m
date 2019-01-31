@@ -22,6 +22,11 @@
 
 #pragma mark - WKInterfaceController methods
 
+- (IBAction)displayTimeline
+{
+    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] switchControllers];
+}
+
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
     

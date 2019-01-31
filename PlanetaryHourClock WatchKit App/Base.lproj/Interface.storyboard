@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="Xfn-Go-AEQ" pageOrientation="vertical">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="krG-kh-mPi" pageOrientation="vertical">
     <device id="watch44" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -9,19 +9,31 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14460.16"/>
     </dependencies>
     <scenes>
-        <!--Map Interface Controller-->
+        <!--MapInterfaceController-->
         <scene sceneID="MHZ-zS-PYE">
             <objects>
-                <controller animationDuration="1" fullBounds="YES" fullScreen="YES" id="Xfn-Go-AEQ" customClass="MapInterfaceController">
+                <controller identifier="MapInterfaceController" title="Cancel" animationDuration="1" fullBounds="YES" fullScreen="YES" id="Xfn-Go-AEQ" userLabel="MapInterfaceController" customClass="MapInterfaceController">
                     <items>
                         <map width="1" height="1" alignment="center" verticalAlignment="center" id="n4N-TQ-eww"/>
                     </items>
+                    <menu key="menu" id="gP3-0L-I6L">
+                        <items>
+                            <menuItem title="Menu Item" icon="info" id="1tF-c4-OvD">
+                                <connections>
+                                    <action selector="displayTimeline" destination="Xfn-Go-AEQ" id="ELm-Ti-uwf"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                    <attributedString key="userComments">
+                        <fragment content="MapInterfaceController"/>
+                    </attributedString>
                     <connections>
                         <outlet property="map" destination="n4N-TQ-eww" id="k6H-d2-ai1"/>
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="-103" y="118"/>
+            <point key="canvasLocation" x="-103" y="102"/>
         </scene>
         <!--Table Interface Controller-->
         <scene sceneID="hJs-A1-ru7">
@@ -81,6 +93,15 @@
                             </items>
                         </table>
                     </items>
+                    <menu key="menu" id="Uyz-qS-mri">
+                        <items>
+                            <menuItem title="Map" icon="more" id="BSJ-u8-6iM">
+                                <connections>
+                                    <action selector="displayMap" destination="krG-kh-mPi" id="sfY-Pp-N6W"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
                     <connections>
                         <outlet property="planetaryHoursTable" destination="C7H-qT-wzu" id="4MU-or-90v"/>
                     </connections>

@@ -11,6 +11,18 @@
 
 @implementation ExtensionDelegate
 
+- (void)switchControllers
+{
+    if ([[[WKExtension sharedExtension] visibleInterfaceController] isEqual:[[WKExtension sharedExtension] rootInterfaceController]])
+    {
+        // switch to map
+        [[[WKExtension sharedExtension] rootInterfaceController] presentControllerWithName:@"MapInterfaceController" context:nil];
+    } else {
+        // switch to timeline
+        [[[WKExtension sharedExtension] visibleInterfaceController] dismissController];
+    }
+}
+
 - (void)applicationDidFinishLaunching {
     //[[PlanetaryHourDataSource.sharedDataSource locationManager] requestLocation];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"PlanetaryHoursDataSourceUpdatedNotification"
