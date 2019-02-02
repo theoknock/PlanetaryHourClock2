@@ -34,7 +34,9 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
         centerAlignedParagraphStyle.alignment                = NSTextAlignmentCenter;
         NSDictionary *centerAlignedTextAttributes            = @{NSForegroundColorAttributeName : (!color) ? [UIColor redColor] : color,
                                                                  NSParagraphStyleAttributeName  : centerAlignedParagraphStyle,
-                                                                 NSFontAttributeName            : [UIFont systemFontOfSize:fontsize weight:UIFontWeightBlack]
+                                                                 NSFontAttributeName            : [UIFont systemFontOfSize:fontsize weight:UIFontWeightBlack],
+                                                                 NSStrokeColorAttributeName     : [UIColor blackColor],
+                                                                 NSStrokeWidthAttributeName     : [NSNumber numberWithFloat:3.0]
                                                                  };
         
         CGSize textSize = [text sizeWithAttributes:centerAlignedTextAttributes];
@@ -42,6 +44,7 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
         [text drawAtPoint:CGPointZero withAttributes:centerAlignedTextAttributes];
         
         CGContextSetShouldAntialias(UIGraphicsGetCurrentContext(), YES);
+        CGContextSetShadow(UIGraphicsGetCurrentContext(), CGSizeZero, fontsize);
         UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
         
@@ -77,8 +80,6 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
         [lm startUpdatingLocation];
         
         self->_locationManager = lm;
-        
-        NSLog(@"%s", __PRETTY_FUNCTION__);
     }
     
     return lm;
@@ -119,7 +120,6 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
         if (status == kCLAuthorizationStatusAuthorizedWhenInUse ||
             status == kCLAuthorizationStatusAuthorizedAlways)
         {
-            NSLog(@"Location services authorized\t%d", status);
             //            [manager requestLocation];
             
             //            __block dispatch_block_t locate;
@@ -157,7 +157,6 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations
 {
-    NSLog(@"%s", __PRETTY_FUNCTION__);
     CLLocationCoordinate2D coordinate = locations.lastObject.coordinate;
     if (CLLocationCoordinate2DIsValid(coordinate) && (coordinate.latitude != 0.0 || coordinate.longitude != 0.0))
     {
@@ -168,7 +167,6 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
                                                               userInfo:nil];
             lastCoordinate = coordinate;
         }
-        NSLog(@"Posting PlanetaryHoursDataSourceUpdatedNotification...");
     }
 }
 
@@ -304,18 +302,6 @@ NSArray<NSDate *> *(^calculateSolarData)(NSDate *, CLLocationCoordinate2D) = ^(N
 
 #pragma mark - Planetary Hour Calculation definitions and enumerations
 
-#define NUMBER_OF_PLANETS 7
-
-typedef NS_ENUM(NSUInteger, Planet) {
-    Sun,
-    Moon,
-    Mars,
-    Mercury,
-    Jupiter,
-    Venus,
-    Saturn
-};
-
 typedef NS_ENUM(NSUInteger, Day) {
     SUN,
     MON,
@@ -331,33 +317,37 @@ typedef NS_ENUM(NSUInteger, Meridian) {
     PM
 };
 
-NSString *(^planetSymbolForPlanet)(Planet) = ^(Planet planet) {
-    planet = planet % NUMBER_OF_PLANETS;
-    switch (planet) {
-        case Sun:
-            return @"☉";
-            break;
-        case Moon:
-            return @"☽";
-            break;
-        case Mars:
-            return @"♂︎";
-            break;
-        case Mercury:
-            return @"☿";
-            break;
-        case Jupiter:
-            return @"♃";
-            break;
-        case Venus:
-            return @"♀︎";
-            break;
-        case Saturn:
-            return @"♄";
-            break;
-        default:
-            break;
-    }
+- (NSString * _Nonnull (^)(Planet))planetSymbolForPlanet
+{
+    return ^(Planet planet) {
+        planet = planet % NUMBER_OF_PLANETS;
+        switch (planet) {
+            case Sun:
+                return @"☉";
+                break;
+            case Moon:
+                return @"☽";
+                break;
+            case Mars:
+                return @"♂︎";
+                break;
+            case Mercury:
+                return @"☿";
+                break;
+            case Jupiter:
+                return @"♃";
+                break;
+            case Venus:
+                return @"♀︎";
+                break;
+            case Saturn:
+                return @"♄";
+                break;
+            default:
+                return @"㊏";
+                break;
+        }
+    };
 };
 
 NSString *(^planetAbbreviatedNameForPlanet)(NSString *) = ^(NSString *planetName) {
@@ -437,7 +427,7 @@ NSString *(^planetNameForDay)(NSDate * _Nullable) = ^(NSDate * _Nullable date)
 };
 
 NSString *(^planetSymbolForDay)(NSDate * _Nullable) = ^(NSDate * _Nullable date) {
-    return planetSymbolForPlanet(planetForDay(date));
+    return PlanetaryHourDataSource.sharedDataSource.planetSymbolForPlanet(planetForDay(date));
 };
 
 NSString *(^planetNameForHour)(NSDate * _Nullable, NSUInteger) = ^(NSDate * _Nullable date, NSUInteger hour)
@@ -465,12 +455,12 @@ NSString *(^planetNameForHour)(NSDate * _Nullable, NSUInteger) = ^(NSDate * _Nul
             return @"Saturn";
             break;
         default:
-            break;
+            return @"Earth";
     }
 };
 
 NSString *(^planetSymbolForHour)(NSDate * _Nullable, NSUInteger) = ^(NSDate * _Nullable date, NSUInteger hour) {
-    return planetSymbolForPlanet(planetForHour(date, hour));
+    return PlanetaryHourDataSource.sharedDataSource.planetSymbolForPlanet(planetForHour(date, hour));
 };
 
 typedef NS_ENUM(NSUInteger, PlanetColor) {
@@ -483,29 +473,54 @@ typedef NS_ENUM(NSUInteger, PlanetColor) {
     Grey
 };
 
-UIColor *(^colorForPlanetSymbol)(NSString *) = ^(NSString *planetarySymbol) {
-    if ([planetarySymbol isEqualToString:@"☉"])
-        return [UIColor yellowColor];
-    else if ([planetarySymbol isEqualToString:@"☽"])
-        return [UIColor whiteColor];
-    else if ([planetarySymbol isEqualToString:@"♂︎"])
-        return [UIColor redColor];
-    else if ([planetarySymbol isEqualToString:@"☿"])
-        return [UIColor brownColor];
-    else if ([planetarySymbol isEqualToString:@"♃"])
-        return [UIColor orangeColor];
-    else if ([planetarySymbol isEqualToString:@"♀︎"])
-        return [UIColor greenColor];
-    else if ([planetarySymbol isEqualToString:@"♄"])
-        return [UIColor grayColor];
-    else
-        return [UIColor whiteColor];
+- (UIColor * _Nonnull (^)(NSString * _Nonnull))colorForPlanetSymbol
+{
+    return ^(NSString *planetarySymbol) {
+        if ([planetarySymbol isEqualToString:@"☉"])
+            return [UIColor yellowColor];
+        else if ([planetarySymbol isEqualToString:@"☽"])
+            return [UIColor whiteColor];
+        else if ([planetarySymbol isEqualToString:@"♂︎"])
+            return [UIColor redColor];
+        else if ([planetarySymbol isEqualToString:@"☿"])
+            return [UIColor brownColor];
+        else if ([planetarySymbol isEqualToString:@"♃"])
+            return [UIColor orangeColor];
+        else if ([planetarySymbol isEqualToString:@"♀︎"])
+            return [UIColor greenColor];
+        else if ([planetarySymbol isEqualToString:@"♄"])
+            return [UIColor grayColor];
+        else
+            return [UIColor greenColor];
+    };
+};
+
+- (Planet (^)(NSString * _Nonnull))planetForPlanetSymbol
+{
+    return ^(NSString *planetarySymbol) {
+        if ([planetarySymbol isEqualToString:@"☉"])
+            return Sun;
+        else if ([planetarySymbol isEqualToString:@"☽"])
+            return Moon;
+        else if ([planetarySymbol isEqualToString:@"♂︎"])
+            return Mars;
+        else if ([planetarySymbol isEqualToString:@"☿"])
+            return Mercury;
+        else if ([planetarySymbol isEqualToString:@"♃"])
+            return Jupiter;
+        else if ([planetarySymbol isEqualToString:@"♀︎"])
+            return Venus;
+        else if ([planetarySymbol isEqualToString:@"♄"])
+            return Saturn;
+        else
+            return Earth;
+    };
 };
 
 NSAttributedString *(^attributedPlanetSymbol)(NSString *) = ^(NSString *symbol) {
     NSMutableParagraphStyle *centerAlignedParagraphStyle  = [[NSMutableParagraphStyle alloc] init];
     centerAlignedParagraphStyle.alignment                 = NSTextAlignmentCenter;
-    NSDictionary *centerAlignedTextAttributes             = @{NSForegroundColorAttributeName : colorForPlanetSymbol(symbol),
+    NSDictionary *centerAlignedTextAttributes             = @{NSForegroundColorAttributeName : PlanetaryHourDataSource.sharedDataSource.colorForPlanetSymbol(symbol),
                                                               NSFontAttributeName            : [UIFont systemFontOfSize:48.0 weight:UIFontWeightBold],
                                                               NSParagraphStyleAttributeName  : centerAlignedParagraphStyle};
     
@@ -623,7 +638,7 @@ NSArray<NSNumber *> *(^planetaryHourDurations)(NSDate *, NSDate *, NSDate *) = ^
             NSAttributedString *symbol        = attributedPlanetSymbol(planetSymbolForHour(solarTransits[Sunrise], hour));
             NSString *name                    = planetNameForHour(solarTransits[Sunrise], hour);
             NSString *abbr                    = planetAbbreviatedNameForPlanet(name);
-            UIColor *color                    = colorForPlanetSymbol([symbol string]);
+            UIColor *color                    = PlanetaryHourDataSource.sharedDataSource.colorForPlanetSymbol([symbol string]);
             CLLocation *coordinate            = PlanetaryHourDataSource.sharedDataSource.locatePlanetaryHour(location, date, meters_per_second, meters_per_day, meters_per_day_hour, meters_per_night_hour, timeOffset, hour);
             planetaryHour(symbol, name, abbr, startDate, endDate, hour, color, coordinate,
                           (CLLocationDistance)((meridian == AM) ? meters_per_day_hour : meters_per_night_hour),

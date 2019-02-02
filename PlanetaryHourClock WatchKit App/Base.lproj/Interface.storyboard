@@ -18,7 +18,7 @@
                     </items>
                     <menu key="menu" id="gP3-0L-I6L">
                         <items>
-                            <menuItem title="Menu Item" icon="info" id="1tF-c4-OvD">
+                            <menuItem title="Timeline" icon="info" id="1tF-c4-OvD">
                                 <connections>
                                     <action selector="displayTimeline" destination="Xfn-Go-AEQ" id="ELm-Ti-uwf"/>
                                 </connections>

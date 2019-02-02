@@ -38,7 +38,6 @@
 }
 
 - (void)didReceiveNotification:(UNNotification *)notification {
-    NSLog(@"%s", __PRETTY_FUNCTION__);
     // This method is called when a notification needs to be presented.
     // Implement it if you use a dynamic notification interface.
     // Populate your dynamic notification interface as quickly as possible.

@@ -146,11 +146,34 @@ CLKComplicationTemplateGraphicCornerGaugeText *(^complicationTemplateGraphicCorn
     template.outerTextProvider = [CLKSimpleTextProvider textProviderWithText:text];
     NSDate *earlierDate = [startDate earlierDate:endDate];
     NSDate *laterDate   = ([earlierDate isEqualToDate:startDate]) ? endDate : startDate;
-    template.gaugeProvider = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:CLKGaugeProviderStyleRing gaugeColors:@[tintColor, [UIColor darkGrayColor]] gaugeColorLocations:@[[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:(2.0/3.0)]] startDate:earlierDate startFillFraction:0.0 endDate:laterDate endFillFraction:1.0];
+    template.gaugeProvider = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:CLKGaugeProviderStyleRing gaugeColors:@[tintColor, tintColor, [UIColor darkGrayColor]] gaugeColorLocations:@[[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:1.0/3.0], [NSNumber numberWithFloat:1.0]] startDate:earlierDate startFillFraction:0.0 endDate:laterDate endFillFraction:1.0];
     
     return template;
 };
 
+CLKComplicationTemplateGraphicCircularOpenGaugeImage *(^complicationTemplateGraphicCircularOpenGaugeImage)(NSString *, UIColor *, NSNumber *, NSDate *, NSDate *, NSArray<UIColor *> *, NSArray<NSNumber *> *, CLKGaugeProviderStyle) = ^(NSString *symbol, UIColor *color, NSNumber *hour, NSDate *startDate, NSDate *endDate, NSArray<UIColor *> *gaugeColors, NSArray<NSNumber *> *gaugeColorLocations, CLKGaugeProviderStyle style)
+{
+    CLKComplicationTemplateGraphicCircularOpenGaugeImage *template = [[CLKComplicationTemplateGraphicCircularOpenGaugeImage alloc] init];
+    template.centerTextProvider  = [CLKSimpleTextProvider textProviderWithText:symbol];
+    template.bottomImageProvider = [CLKFullColorImageProvider providerWithFullColorImage:[[PlanetaryHourDataSource sharedDataSource] imageFromText]([NSString stringWithFormat:@"%ld", hour.longValue], color, 9.0)];
+    template.gaugeProvider       = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:style gaugeColors:gaugeColors gaugeColorLocations:gaugeColorLocations startDate:startDate endDate:endDate];
+    
+    return template;
+};
+
+CLKComplicationTemplateGraphicCircularOpenGaugeRangeText *(^complicationTemplateGraphicCircularOpenGaugeRangeText)(NSString *, UIColor *, NSNumber *, NSDate *, NSDate *) = ^(NSString *symbol, UIColor *color, NSNumber *hour, NSDate *startDate, NSDate *endDate)
+{
+    CLKComplicationTemplateGraphicCircularOpenGaugeRangeText *template = [[CLKComplicationTemplateGraphicCircularOpenGaugeRangeText alloc] init];
+    template.centerTextProvider   = [CLKSimpleTextProvider textProviderWithText:[NSString stringWithFormat:@"%ld", hour.longValue]];
+    template.leadingTextProvider  = [CLKSimpleTextProvider textProviderWithText:symbol];
+    Planet planet          = (Planet)([[PlanetaryHourDataSource sharedDataSource] planetForPlanetSymbol](symbol) + 1) % NUMBER_OF_PLANETS;
+    NSString *planetSymbol = [[PlanetaryHourDataSource sharedDataSource] planetSymbolForPlanet](planet);
+    UIColor *planetColor   = [[PlanetaryHourDataSource sharedDataSource] colorForPlanetSymbol](planetSymbol);
+    template.trailingTextProvider = [CLKSimpleTextProvider textProviderWithText:planetSymbol];
+    template.gaugeProvider        = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:CLKGaugeProviderStyleRing gaugeColors:@[color, planetColor] gaugeColorLocations:@[[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:1.0]] startDate:startDate endDate:endDate];
+    
+    return template;
+};
 
 CLKComplicationTemplate *(^templateForComplication)(CLKComplicationFamily, NSDictionary *) = ^(CLKComplicationFamily family, NSDictionary *data) {
     CLKComplicationTemplate *template = nil;
@@ -208,6 +231,11 @@ CLKComplicationTemplate *(^templateForComplication)(CLKComplicationFamily, NSDic
             template = complicationTemplateGraphicCornerGaugeText([data objectForKey:@"symbol"], [data objectForKey:@"color"], [data objectForKey:@"start"], [data objectForKey:@"end"]);
             break;
         }
+        case CLKComplicationFamilyGraphicCircular:
+        {
+            template = complicationTemplateGraphicCircularOpenGaugeRangeText([data objectForKey:@"symbol"], [data objectForKey:@"color"], [data objectForKey:@"hour"], [data objectForKey:@"start"], [data objectForKey:@"end"]);
+            break;
+        }
         default:
         {
             break;
@@ -258,7 +286,6 @@ CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKCompli
 
 - (void)getTimelineEntriesForComplication:(CLKComplication *)complication afterDate:(NSDate *)date limit:(NSUInteger)limit withHandler:(void(^)(NSArray<CLKComplicationTimelineEntry *> * __nullable entries))handler
 {
-    NSLog(@"%s", __PRETTY_FUNCTION__);
     [self getTimelineEndDateForComplication:complication withHandler:^(NSDate * _Nullable timelineEndDate) {
         __block NSMutableArray *entries = [NSMutableArray arrayWithCapacity:limit];
         __block CLKComplicationTemplate *template = nil;

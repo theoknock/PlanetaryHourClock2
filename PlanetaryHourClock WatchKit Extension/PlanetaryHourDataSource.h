@@ -16,15 +16,22 @@ NS_ASSUME_NONNULL_BEGIN
 #define SECONDS_PER_DAY 86400.00f
 #define HOURS_PER_DAY 24
 #define HOURS_PER_SOLAR_TRANSIT 12
+#define NUMBER_OF_PLANETS 7
 
 typedef NS_ENUM(NSUInteger, SolarTransit) {
     Sunrise,
     Sunset
 };
 
-typedef NS_ENUM(NSUInteger, PlanetaryHoursTimelineDirection) {
-    PlanetaryHoursTimelineDirectionForward,
-    PlanetaryHoursTimelineDirectionBackward
+typedef NS_ENUM(NSUInteger, Planet) {
+    Sun,
+    Moon,
+    Mars,
+    Mercury,
+    Jupiter,
+    Venus,
+    Saturn,
+    Earth
 };
 
 typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString *name, NSString *abbr, NSDate *startDate, NSDate *endDate, NSInteger hour, UIColor *color, CLLocation *location, CLLocationDistance distance, BOOL current);
@@ -45,6 +52,9 @@ typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString
 @property (strong, nonatomic) NSDictionary *(^planetaryHourData)(NSString *symbol, NSString *name, NSNumber *hour, NSString *abbr, NSDate *start, NSDate *end, UIColor *color);
 @property (strong, nonatomic) CLLocation *(^locatePlanetaryHour)(CLLocation * _Nullable location, NSDate * _Nullable date, double meters_per_second, double meters_per_day, double meters_per_day_hour, double meters_per_night_hour, NSTimeInterval timeOffset, NSUInteger hour);
 @property (strong, nonatomic) NSArray<NSDate *> *(^solarTransits)(NSDate *date, CLLocation *location);
+@property (strong, nonatomic) Planet (^planetForPlanetSymbol)(NSString *planetarySymbol);
+@property (strong, nonatomic) NSString *(^planetSymbolForPlanet)(Planet planet);
+@property (strong, nonatomic) UIColor *(^colorForPlanetSymbol)(NSString *planetarySymbol);
 
 @end
 
