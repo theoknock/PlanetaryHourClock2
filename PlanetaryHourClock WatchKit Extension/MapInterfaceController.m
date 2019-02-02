@@ -50,7 +50,6 @@
                                                                       }
                                                                   });
     });
-    dispatch_resume(annotationUpdateTimer);
     
     // Location updates notification observer
     [[NSNotificationCenter defaultCenter] addObserverForName:@"PlanetaryHoursDataSourceUpdatedNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
@@ -64,6 +63,8 @@
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
     
+    dispatch_resume(annotationUpdateTimer);
+    
     [self.crownSequencer setDelegate:self];
     [self.crownSequencer focus];
 }
@@ -73,22 +74,20 @@
     [super didDeactivate];
     
     [self.crownSequencer resignFocus];
+    dispatch_suspend(annotationUpdateTimer);
 }
 
 #pragma mark - WKCrownDelegate methods
 
 - (void)crownDidRotate:(WKCrownSequencer *)crownSequencer rotationalDelta:(double)rotationalDelta
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        span.latitudeDelta  += ((rotationalDelta * rotationalDelta) * (rotationalDelta)) + (span.latitudeDelta * rotationalDelta);
-        span.longitudeDelta += ((rotationalDelta * rotationalDelta) * (rotationalDelta)) + (span.longitudeDelta * rotationalDelta);
-        span.latitudeDelta   = (span.latitudeDelta < 0) ? 0  : (span.latitudeDelta  > MKCoordinateRegionForMapRect(MKMapRectWorld).span.latitudeDelta)  ? MKCoordinateRegionForMapRect(MKMapRectWorld).span.latitudeDelta  : span.latitudeDelta;
-        span.longitudeDelta  = (span.longitudeDelta < 0) ? 0 : (span.longitudeDelta > MKCoordinateRegionForMapRect(MKMapRectWorld).span.longitudeDelta) ? MKCoordinateRegionForMapRect(MKMapRectWorld).span.longitudeDelta : span.longitudeDelta;
-        
-        MKCoordinateRegion visibleRegion = MKCoordinateRegionMake(PlanetaryHourDataSource.sharedDataSource.locationManager.location.coordinate, span);
-        [self.map setRegion:visibleRegion];
-        
-    });
+    span.latitudeDelta  += ((rotationalDelta * rotationalDelta) * (rotationalDelta)) + (span.latitudeDelta * rotationalDelta);
+    span.longitudeDelta += ((rotationalDelta * rotationalDelta) * (rotationalDelta)) + (span.longitudeDelta * rotationalDelta);
+    span.latitudeDelta   = (span.latitudeDelta < 0) ? 0  : (span.latitudeDelta  > MKCoordinateRegionForMapRect(MKMapRectWorld).span.latitudeDelta)  ? MKCoordinateRegionForMapRect(MKMapRectWorld).span.latitudeDelta  : span.latitudeDelta;
+    span.longitudeDelta  = (span.longitudeDelta < 0) ? 0 : (span.longitudeDelta > MKCoordinateRegionForMapRect(MKMapRectWorld).span.longitudeDelta) ? MKCoordinateRegionForMapRect(MKMapRectWorld).span.longitudeDelta : span.longitudeDelta;
+    
+    MKCoordinateRegion visibleRegion = MKCoordinateRegionMake(PlanetaryHourDataSource.sharedDataSource.locationManager.location.coordinate, span);
+    [self.map setRegion:visibleRegion];
 }
 
 @end

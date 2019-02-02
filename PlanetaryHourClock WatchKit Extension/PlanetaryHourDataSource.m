@@ -36,7 +36,7 @@ static PlanetaryHourDataSource *sharedDataSource = NULL;
                                                                  NSParagraphStyleAttributeName  : centerAlignedParagraphStyle,
                                                                  NSFontAttributeName            : [UIFont systemFontOfSize:fontsize weight:UIFontWeightBlack],
                                                                  NSStrokeColorAttributeName     : [UIColor blackColor],
-                                                                 NSStrokeWidthAttributeName     : [NSNumber numberWithFloat:3.0]
+                                                                 NSStrokeWidthAttributeName     : [NSNumber numberWithFloat:-2.0]
                                                                  };
         
         CGSize textSize = [text sizeWithAttributes:centerAlignedTextAttributes];

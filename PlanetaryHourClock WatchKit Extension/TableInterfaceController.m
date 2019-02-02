@@ -27,44 +27,11 @@
 
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
-
-    // Configure interface objects here.
-    self->_timeFormatter = [[NSDateFormatter alloc] init];
-    self->_timeFormatter.dateStyle = NSDateFormatterNoStyle;
-    self->_timeFormatter.timeStyle = NSDateFormatterShortStyle;
     
+    __weak typeof(WKInterfaceTable *) weakPlanetaryHoursTable = self.planetaryHoursTable;
     [[NSNotificationCenter defaultCenter] addObserverForName:@"PlanetaryHoursDataSourceUpdatedNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
-        [self.planetaryHoursTable setNumberOfRows:24 withRowType:@"PlanetaryHoursTableRow"];
-        PlanetaryHourDataSource.sharedDataSource.planetaryHours((CLLocation *)note.object, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
-            PlanetaryHourRowController* row = (PlanetaryHourRowController *)[self.planetaryHoursTable rowControllerAtIndex:hour];
-            [row.symbolLabel setAttributedText:symbol];
-            [row.planetLabel setText:name];
-            [row.hourLabel setText:[NSString stringWithFormat:@"Hour %ld", (long)hour + 1]];
-            
-            NSDateFormatter *startDateFormatter = [[NSDateFormatter alloc] init];
-            startDateFormatter.timeStyle        = NSDateFormatterShortStyle;
-            NSString *startDateString           = [startDateFormatter stringFromDate:startDate];
-            [row.startDateLabel setText:startDateString];
-            
-            NSDateFormatter *endDateFormatter   = [[NSDateFormatter alloc] init];
-            endDateFormatter.timeStyle          = NSDateFormatterShortStyle;
-            NSString *endDateString             = [endDateFormatter stringFromDate:endDate];
-            [row.endDateLabel setText:endDateString];
-            
-            if (current)
-                [self.planetaryHoursTable scrollToRowAtIndex:hour];
-            
-            if (hour < 12)
-                [row.rowGroup setBackgroundColor:[UIColor colorWithRed:1.0 green:1.0 blue:0.0 alpha:0.25]];
-            else
-                [row.rowGroup setBackgroundColor:[UIColor colorWithRed:1.0 green:0.0 blue:1.0 alpha:0.15]];
-            
-            if (!current)
-            {
-                [row.rowGroup setAlpha:0.5];
-            }
-        });
-        
+        __strong typeof(WKInterfaceTable *) planetaryHoursTable = weakPlanetaryHoursTable;
+        updatePlanetaryHoursTable(planetaryHoursTable);
         [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
         }];
@@ -74,12 +41,50 @@
 - (void)willActivate {
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
+    
+    __weak typeof(WKInterfaceTable *) weakPlanetaryHoursTable = self.planetaryHoursTable;
+    updatePlanetaryHoursTable(weakPlanetaryHoursTable);
 }
 
 - (void)didDeactivate {
     // This method is called when watch view controller is no longer visible
     [super didDeactivate];
 }
+
+void (^updatePlanetaryHoursTable)(__weak WKInterfaceTable *) = ^(__weak WKInterfaceTable *planetaryHoursTable)
+{
+    __strong typeof(WKInterfaceTable *) table = planetaryHoursTable;
+    [table setNumberOfRows:24 withRowType:@"PlanetaryHoursTableRow"];
+    PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
+        PlanetaryHourRowController* row = (PlanetaryHourRowController *)[table rowControllerAtIndex:hour];
+        [row.symbolLabel setAttributedText:symbol];
+        [row.planetLabel setText:name];
+        [row.hourLabel setText:[NSString stringWithFormat:@"Hour %ld", (long)hour + 1]];
+        
+        NSDateFormatter *startDateFormatter = [[NSDateFormatter alloc] init];
+        startDateFormatter.timeStyle        = NSDateFormatterShortStyle;
+        NSString *startDateString           = [startDateFormatter stringFromDate:startDate];
+        [row.startDateLabel setText:startDateString];
+        
+        NSDateFormatter *endDateFormatter   = [[NSDateFormatter alloc] init];
+        endDateFormatter.timeStyle          = NSDateFormatterShortStyle;
+        NSString *endDateString             = [endDateFormatter stringFromDate:endDate];
+        [row.endDateLabel setText:endDateString];
+        
+        if (current)
+            [table scrollToRowAtIndex:hour];
+        
+        if (hour < 12)
+            [row.rowGroup setBackgroundColor:[UIColor colorWithRed:1.0 green:1.0 blue:0.0 alpha:0.25]];
+        else
+            [row.rowGroup setBackgroundColor:[UIColor colorWithRed:1.0 green:0.0 blue:1.0 alpha:0.15]];
+        
+        if (!current)
+        {
+            [row.rowGroup setAlpha:0.5];
+        }
+    });
+};
 
 void (^addNotification)(NSDate *, NSString *, NSString *) = ^(NSDate *startTime, NSString *symbol, NSString *name)
 {
@@ -213,6 +218,7 @@ void (^addNotification)(NSDate *, NSString *, NSString *) = ^(NSDate *startTime,
 //}
 
 @end
+
 
 
 
