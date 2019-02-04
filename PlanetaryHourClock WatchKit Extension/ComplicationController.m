@@ -24,13 +24,13 @@
 }
 
 - (void)getTimelineEndDateForComplication:(CLKComplication *)complication withHandler:(void(^)(NSDate * __nullable date))handler {
-//    NSDate *date = [NSDate date];
-//    NSCalendar *calendar = [NSCalendar currentCalendar];
-//    NSDateComponents *components = [[NSDateComponents alloc] init];
-//    components.day = 1;
-//    NSDate *tomorrow = [calendar dateByAddingComponents:components toDate:date options:NSCalendarMatchNextTimePreservingSmallerUnits];
-//
-//    handler(solarTransitDate(tomorrow, Sunrise));
+    //    NSDate *date = [NSDate date];
+    //    NSCalendar *calendar = [NSCalendar currentCalendar];
+    //    NSDateComponents *components = [[NSDateComponents alloc] init];
+    //    components.day = 1;
+    //    NSDate *tomorrow = [calendar dateByAddingComponents:components toDate:date options:NSCalendarMatchNextTimePreservingSmallerUnits];
+    //
+    //    handler(solarTransitDate(tomorrow, Sunrise));
     handler([NSDate distantFuture]);
 }
 
@@ -236,7 +236,7 @@ CLKComplicationTemplate *(^templateForComplication)(CLKComplicationFamily, NSDic
         }
         case CLKComplicationFamilyExtraLarge:
         {
-//            template = complicationTemplateExtraLargeSimpleText([data objectForKey:@"symbol"], [data objectForKey:@"color"]);
+            //            template = complicationTemplateExtraLargeSimpleText([data objectForKey:@"symbol"], [data objectForKey:@"color"]);
             long hour = [(NSNumber *)[data objectForKey:@"hour"] longValue] + 1;
             float dayExpiry = ((hour * 60) * 60) / SECONDS_PER_DAY;
             template = complicationTemplateExtraLargeRingImage([data objectForKey:@"symbol"], CLKComplicationRingStyleOpen, dayExpiry, [data objectForKey:@"color"]);
@@ -308,29 +308,31 @@ CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKCompli
 
 - (void)getTimelineEntriesForComplication:(CLKComplication *)complication afterDate:(NSDate *)date limit:(NSUInteger)limit withHandler:(void(^)(NSArray<CLKComplicationTimelineEntry *> * __nullable entries))handler
 {
-    [self getTimelineEndDateForComplication:complication withHandler:^(NSDate * _Nullable timelineEndDate) {
-        __block NSMutableArray *entries = [NSMutableArray arrayWithCapacity:limit];
-        __block CLKComplicationTemplate *template = nil;
+    __block NSMutableArray *entries = [NSMutableArray arrayWithCapacity:limit];
+    __block CLKComplicationTemplate *template = nil;
     
-        NSDateInterval *dateInterval = [[NSDateInterval alloc] initWithStartDate:date endDate:timelineEndDate];
-        PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
+    NSUInteger days = (NSUInteger)(limit % HOURS_PER_DAY);
+    for (int day = 0; day < days; day++)
+    {
+        NSDate *dateIntervalStart = [date dateByAddingTimeInterval:day * SECONDS_PER_DAY];
+        NSLog(@"Day %d of %d: %@", day, days, dateIntervalStart);
+        NSDateInterval *dateInterval = [[NSDateInterval alloc] initWithStartDate:dateIntervalStart endDate:[NSDate distantFuture]];
+        PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, dateIntervalStart, ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
             if ([dateInterval containsDate:startDate] && entries.count < limit)
             {
                 template = templateForComplication(complication.family,
-                                                   [PlanetaryHourDataSource.sharedDataSource planetaryHourData]([symbol string], name, [NSNumber numberWithInteger:hour], abbr, startDate, endDate, color));
+                                                  [PlanetaryHourDataSource.sharedDataSource planetaryHourData]([symbol string], name, [NSNumber numberWithInteger:hour], abbr, startDate, endDate, color));
                 CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:startDate complicationTemplate:template] ;
                 [entries addObject:tle];
-                
-                if (hour == 23)
-                {
-                    handler(entries);
-                }
             }
         });
-    }];
+    }
+    
+    handler(entries);
 }
 
 @end
+
 
 
 
