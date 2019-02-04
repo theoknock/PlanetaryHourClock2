@@ -140,13 +140,26 @@ CLKComplicationTemplateModularSmallRingText *(^complicationTemplateModularSmallR
     return template;
 };
 
-CLKComplicationTemplateGraphicCornerGaugeText *(^complicationTemplateGraphicCornerGaugeText)(NSString *, UIColor *, NSDate *, NSDate *) = ^(NSString *text, UIColor *tintColor, NSDate *startDate, NSDate *endDate)
+CLKComplicationTemplateGraphicCornerGaugeText *(^complicationTemplateGraphicCornerGaugeText)(NSString *, UIColor *, NSNumber *, NSDate *, NSDate *) = ^(NSString *symbol, UIColor *tintColor, NSNumber *hour, NSDate *startDate, NSDate *endDate)
 {
     CLKComplicationTemplateGraphicCornerGaugeText *template = [[CLKComplicationTemplateGraphicCornerGaugeText alloc] init];
-    template.outerTextProvider = [CLKSimpleTextProvider textProviderWithText:text];
-    NSDate *earlierDate = [startDate earlierDate:endDate];
-    NSDate *laterDate   = ([earlierDate isEqualToDate:startDate]) ? endDate : startDate;
-    template.gaugeProvider = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:CLKGaugeProviderStyleRing gaugeColors:@[tintColor, tintColor, [UIColor darkGrayColor]] gaugeColorLocations:@[[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:1.0/3.0], [NSNumber numberWithFloat:1.0]] startDate:earlierDate startFillFraction:0.0 endDate:laterDate endFillFraction:1.0];
+    
+    Planet leadingPlanet           = (Planet)([[PlanetaryHourDataSource sharedDataSource] planetForPlanetSymbol](symbol) + 1) % NUMBER_OF_PLANETS;
+    NSString *leadingPlanetSymbol  = [[PlanetaryHourDataSource sharedDataSource] planetSymbolForPlanet](leadingPlanet);
+    UIColor *leadingPlanetColor    = [[PlanetaryHourDataSource sharedDataSource] colorForPlanetSymbol](leadingPlanetSymbol);
+    
+    Planet trailingPlanet          = (Planet)([[PlanetaryHourDataSource sharedDataSource] planetForPlanetSymbol](symbol) + 6) % NUMBER_OF_PLANETS;
+    NSString *trailingPlanetSymbol = [[PlanetaryHourDataSource sharedDataSource] planetSymbolForPlanet](trailingPlanet);
+    UIColor *trailingPlanetColor   = [[PlanetaryHourDataSource sharedDataSource] colorForPlanetSymbol](trailingPlanetSymbol);
+    
+    NSDate *earlierDate            = [startDate earlierDate:endDate];
+    NSDate *laterDate              = ([earlierDate isEqualToDate:startDate]) ? endDate : startDate;
+    
+    template.outerTextProvider    = [CLKSimpleTextProvider textProviderWithText:symbol];
+    template.tintColor            = tintColor;
+    template.trailingTextProvider  = [CLKSimpleTextProvider textProviderWithText:leadingPlanetSymbol];
+    template.leadingTextProvider = [CLKSimpleTextProvider textProviderWithText:trailingPlanetSymbol];
+    template.gaugeProvider        = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:CLKGaugeProviderStyleRing gaugeColors:@[trailingPlanetColor, tintColor, leadingPlanetColor] gaugeColorLocations:@[[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:0.5], [NSNumber numberWithFloat:1.0]] startDate:earlierDate startFillFraction:0.0 endDate:laterDate endFillFraction:1.0];
     
     return template;
 };
@@ -161,16 +174,25 @@ CLKComplicationTemplateGraphicCircularOpenGaugeImage *(^complicationTemplateGrap
     return template;
 };
 
-CLKComplicationTemplateGraphicCircularOpenGaugeRangeText *(^complicationTemplateGraphicCircularOpenGaugeRangeText)(NSString *, UIColor *, NSNumber *, NSDate *, NSDate *) = ^(NSString *symbol, UIColor *color, NSNumber *hour, NSDate *startDate, NSDate *endDate)
+CLKComplicationTemplateGraphicCircularOpenGaugeRangeText *(^complicationTemplateGraphicCircularOpenGaugeRangeText)(NSString *, UIColor *, NSNumber *, NSDate *, NSDate *) = ^(NSString *symbol, UIColor *tintColor, NSNumber *hour, NSDate *startDate, NSDate *endDate)
 {
     CLKComplicationTemplateGraphicCircularOpenGaugeRangeText *template = [[CLKComplicationTemplateGraphicCircularOpenGaugeRangeText alloc] init];
-    template.centerTextProvider   = [CLKSimpleTextProvider textProviderWithText:[NSString stringWithFormat:@"%ld", hour.longValue]];
-    template.leadingTextProvider  = [CLKSimpleTextProvider textProviderWithText:symbol];
-    Planet planet          = (Planet)([[PlanetaryHourDataSource sharedDataSource] planetForPlanetSymbol](symbol) + 1) % NUMBER_OF_PLANETS;
-    NSString *planetSymbol = [[PlanetaryHourDataSource sharedDataSource] planetSymbolForPlanet](planet);
-    UIColor *planetColor   = [[PlanetaryHourDataSource sharedDataSource] colorForPlanetSymbol](planetSymbol);
-    template.trailingTextProvider = [CLKSimpleTextProvider textProviderWithText:planetSymbol];
-    template.gaugeProvider        = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:CLKGaugeProviderStyleRing gaugeColors:@[color, planetColor] gaugeColorLocations:@[[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:1.0]] startDate:startDate endDate:endDate];
+    Planet leadingPlanet           = (Planet)([[PlanetaryHourDataSource sharedDataSource] planetForPlanetSymbol](symbol) + 1) % NUMBER_OF_PLANETS;
+    NSString *leadingPlanetSymbol  = [[PlanetaryHourDataSource sharedDataSource] planetSymbolForPlanet](leadingPlanet);
+    UIColor *leadingPlanetColor    = [[PlanetaryHourDataSource sharedDataSource] colorForPlanetSymbol](leadingPlanetSymbol);
+    
+    Planet trailingPlanet          = (Planet)([[PlanetaryHourDataSource sharedDataSource] planetForPlanetSymbol](symbol) + 6) % NUMBER_OF_PLANETS;
+    NSString *trailingPlanetSymbol = [[PlanetaryHourDataSource sharedDataSource] planetSymbolForPlanet](trailingPlanet);
+    UIColor *trailingPlanetColor   = [[PlanetaryHourDataSource sharedDataSource] colorForPlanetSymbol](trailingPlanetSymbol);
+    
+    NSDate *earlierDate            = [startDate earlierDate:endDate];
+    NSDate *laterDate              = ([earlierDate isEqualToDate:startDate]) ? endDate : startDate;
+    
+    template.centerTextProvider   = [CLKSimpleTextProvider textProviderWithText:symbol];
+    template.tintColor            = tintColor;
+    template.trailingTextProvider  = [CLKSimpleTextProvider textProviderWithText:leadingPlanetSymbol];
+    template.leadingTextProvider = [CLKSimpleTextProvider textProviderWithText:trailingPlanetSymbol];
+    template.gaugeProvider        = [CLKTimeIntervalGaugeProvider gaugeProviderWithStyle:CLKGaugeProviderStyleRing gaugeColors:@[trailingPlanetColor, tintColor, leadingPlanetColor] gaugeColorLocations:@[[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:0.5], [NSNumber numberWithFloat:1.0]] startDate:earlierDate startFillFraction:0.0 endDate:laterDate endFillFraction:1.0];
     
     return template;
 };
@@ -228,7 +250,7 @@ CLKComplicationTemplate *(^templateForComplication)(CLKComplicationFamily, NSDic
         }
         case CLKComplicationFamilyGraphicCorner:
         {
-            template = complicationTemplateGraphicCornerGaugeText([data objectForKey:@"symbol"], [data objectForKey:@"color"], [data objectForKey:@"start"], [data objectForKey:@"end"]);
+            template = complicationTemplateGraphicCornerGaugeText([data objectForKey:@"symbol"], [data objectForKey:@"color"], [data objectForKey:@"hour"], [data objectForKey:@"start"], [data objectForKey:@"end"]);
             break;
         }
         case CLKComplicationFamilyGraphicCircular:

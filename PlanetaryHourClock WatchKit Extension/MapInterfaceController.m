@@ -85,7 +85,7 @@
     span.longitudeDelta += ((rotationalDelta * rotationalDelta) * (rotationalDelta)) + (span.longitudeDelta * rotationalDelta);
     span.latitudeDelta   = (span.latitudeDelta < 0) ? 0  : (span.latitudeDelta  > MKCoordinateRegionForMapRect(MKMapRectWorld).span.latitudeDelta)  ? MKCoordinateRegionForMapRect(MKMapRectWorld).span.latitudeDelta  : span.latitudeDelta;
     span.longitudeDelta  = (span.longitudeDelta < 0) ? 0 : (span.longitudeDelta > MKCoordinateRegionForMapRect(MKMapRectWorld).span.longitudeDelta) ? MKCoordinateRegionForMapRect(MKMapRectWorld).span.longitudeDelta : span.longitudeDelta;
-    
+    NSLog(@"\t\t%f, %f", span.latitudeDelta, span.longitudeDelta);
     MKCoordinateRegion visibleRegion = MKCoordinateRegionMake(PlanetaryHourDataSource.sharedDataSource.locationManager.location.coordinate, span);
     [self.map setRegion:visibleRegion];
 }
