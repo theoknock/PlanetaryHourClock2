@@ -12,6 +12,7 @@
 @interface ExtensionDelegate : NSObject <WKExtensionDelegate>
 
 @property (assign, nonatomic, setter=setSpan:) MKCoordinateSpan span;
+@property (assign, nonatomic, setter=setCenter:) CLLocationCoordinate2D center;
 
 - (void)switchControllers;
 

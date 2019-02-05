@@ -12,7 +12,7 @@
 
 @implementation ExtensionDelegate
 
-@synthesize span = _span;
+@synthesize span = _span, center = _center;
 
 - (MKCoordinateSpan)span
 {
@@ -22,6 +22,19 @@
 - (void)setSpan:(MKCoordinateSpan)span
 {
     _span = span;
+}
+
+- (CLLocationCoordinate2D)center
+{
+    NSLog(@"Getting latitude %f, longitude %f", _center.latitude, _center.longitude);
+    return _center;
+}
+
+- (void)setCenter:(CLLocationCoordinate2D)center
+{
+    NSLog(@"Setting latitude %f, longitude %f", center.latitude, center.longitude);
+    _center = CLLocationCoordinate2DMake(center.latitude, center.longitude);
+    NSLog(@"Setting _latitude %f, _longitude %f", _center.latitude, _center.longitude);
 }
 
 - (void)switchControllers

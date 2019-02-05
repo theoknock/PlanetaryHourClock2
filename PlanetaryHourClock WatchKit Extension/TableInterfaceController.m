@@ -83,6 +83,17 @@ void (^updatePlanetaryHoursTable)(__weak WKInterfaceTable *) = ^(__weak WKInterf
     });
 };
 
+- (void)table:(WKInterfaceTable *)table didSelectRowAtIndex:(NSInteger)rowIndex
+{
+    PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
+        if (hour == rowIndex)
+        {
+            [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] setCenter:location.coordinate];
+            [self displayMap];
+        }
+    });
+}
+
 void (^addNotification)(NSDate *, NSString *, NSString *) = ^(NSDate *startTime, NSString *symbol, NSString *name)
 {
     // User (local) notification

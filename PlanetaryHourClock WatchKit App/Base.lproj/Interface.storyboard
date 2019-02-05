@@ -42,7 +42,7 @@
                     <items>
                         <table alignment="center" verticalAlignment="center" id="C7H-qT-wzu">
                             <items>
-                                <tableRow identifier="PlanetaryHoursTableRow" selectable="NO" id="GBy-fj-OJ8" customClass="PlanetaryHourRowController">
+                                <tableRow identifier="PlanetaryHoursTableRow" id="GBy-fj-OJ8" customClass="PlanetaryHourRowController">
                                     <group key="rootItem" width="1" height="1" alignment="left" id="MJ0-iX-qT4">
                                         <items>
                                             <group width="1" height="1" alignment="center" verticalAlignment="center" layout="vertical" id="3C3-AV-Nf5">
