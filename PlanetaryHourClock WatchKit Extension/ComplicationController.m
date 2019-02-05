@@ -302,6 +302,11 @@ CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKCompli
                                                [PlanetaryHourDataSource.sharedDataSource planetaryHourData]([symbol string], name, [NSNumber numberWithInteger:hour], abbr, startDate, endDate, color));
             CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:startDate complicationTemplate:template] ;
             handler(tle);
+            
+            if (hour == 23)
+                [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    [[CLKComplicationServer sharedInstance] extendTimelineForComplication:obj];
+                }];
         }
     });
 }
@@ -315,7 +320,7 @@ CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKCompli
     for (int day = 0; day < days; day++)
     {
         NSDate *dateIntervalStart = [date dateByAddingTimeInterval:day * SECONDS_PER_DAY];
-        NSLog(@"Day %d of %d: %@", day, days, dateIntervalStart);
+//        NSLog(@"Day %d of %d: %@", day, days, dateIntervalStart);
         NSDateInterval *dateInterval = [[NSDateInterval alloc] initWithStartDate:dateIntervalStart endDate:[NSDate distantFuture]];
         PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, dateIntervalStart, ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
             if ([dateInterval containsDate:startDate] && entries.count < limit)

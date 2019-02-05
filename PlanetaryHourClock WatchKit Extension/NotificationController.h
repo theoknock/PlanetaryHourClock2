@@ -13,7 +13,4 @@
 
 @interface NotificationController : WKUserNotificationInterfaceController <UNUserNotificationCenterDelegate>
 
-
-
-
 @end

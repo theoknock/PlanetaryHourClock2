@@ -20,7 +20,7 @@
     self = [super init];
     if (self) {
         // Initialize variables here.
-        
+        NSLog(@"%s", __PRETTY_FUNCTION__);
         // Configure interface objects here.
         
     }

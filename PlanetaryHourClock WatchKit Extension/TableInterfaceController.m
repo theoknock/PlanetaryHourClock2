@@ -32,9 +32,6 @@
     [[NSNotificationCenter defaultCenter] addObserverForName:@"PlanetaryHoursDataSourceUpdatedNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
         __strong typeof(WKInterfaceTable *) planetaryHoursTable = weakPlanetaryHoursTable;
         updatePlanetaryHoursTable(planetaryHoursTable);
-        [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
-        }];
     }];
 }
 

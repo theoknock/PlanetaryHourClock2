@@ -110,35 +110,19 @@
             <point key="canvasLocation" x="-103" y="378"/>
         </scene>
         <!--Static Notification Interface Controller-->
-        <scene sceneID="zKT-EZ-f9A">
+        <scene sceneID="a2h-Dq-tLQ">
             <objects>
-                <notificationController id="SwR-XL-SQr">
+                <notificationController id="sPy-sw-4Z0" customClass="NotificationController">
                     <items>
-                        <label alignment="left" text="Alert Label" id="2k8-ZO-08K"/>
+                        <label alignment="left" text="Alert Label" id="MAn-6C-yFP"/>
                     </items>
-                    <notificationCategory key="notificationCategory" identifier="PlanetaryHourNotification" id="Cty-fz-ROn"/>
+                    <notificationCategory key="notificationCategory" identifier="PlanetaryHourNotification" handlesGrouping="YES" id="nit-0t-lV2"/>
                     <connections>
-                        <outlet property="notificationAlertLabel" destination="2k8-ZO-08K" id="58w-4D-oMb"/>
-                        <segue destination="EM1-hM-uQi" kind="relationship" relationship="dynamicNotificationInterface" id="W92-1Q-Y8Y"/>
-                        <segue destination="x1a-fN-fjQ" kind="relationship" relationship="dynamicInteractiveNotificationInterface" id="LNH-dV-ftC"/>
+                        <outlet property="notificationAlertLabel" destination="MAn-6C-yFP" id="nyF-kO-OZD"/>
                     </connections>
                 </notificationController>
             </objects>
-            <point key="canvasLocation" x="-103" y="678"/>
-        </scene>
-        <!--Notification Controller-->
-        <scene sceneID="OoN-zZ-18H">
-            <objects>
-                <controller id="EM1-hM-uQi" customClass="NotificationController"/>
-            </objects>
-            <point key="canvasLocation" x="197" y="678"/>
-        </scene>
-        <!--Notification Controller-->
-        <scene sceneID="j49-EN-qTw">
-            <objects>
-                <controller id="x1a-fN-fjQ" customClass="NotificationController"/>
-            </objects>
-            <point key="canvasLocation" x="197" y="378"/>
+            <point key="canvasLocation" x="-136" y="769"/>
         </scene>
     </scenes>
 </document>

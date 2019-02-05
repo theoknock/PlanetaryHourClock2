@@ -11,6 +11,8 @@
 
 @interface ExtensionDelegate : NSObject <WKExtensionDelegate>
 
+@property (assign, nonatomic, setter=setSpan:) MKCoordinateSpan span;
+
 - (void)switchControllers;
 
 @end

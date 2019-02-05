@@ -7,9 +7,22 @@
 //
 
 #import "ExtensionDelegate.h"
+#import "NotificationController.h"
 #import "PlanetaryHourDataSource.h"
 
 @implementation ExtensionDelegate
+
+@synthesize span = _span;
+
+- (MKCoordinateSpan)span
+{
+    return _span;
+}
+
+- (void)setSpan:(MKCoordinateSpan)span
+{
+    _span = span;
+}
 
 - (void)switchControllers
 {
@@ -23,7 +36,10 @@
     }
 }
 
-- (void)applicationDidFinishLaunching {
+- (void)applicationDidFinishLaunching
+{
+    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] setSpan:MKCoordinateSpanMake(7.0, 7.0)];
+    
     //[[PlanetaryHourDataSource.sharedDataSource locationManager] requestLocation];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"PlanetaryHoursDataSourceUpdatedNotification"
                                                         object:[[PlanetaryHourDataSource.sharedDataSource locationManager] location]
