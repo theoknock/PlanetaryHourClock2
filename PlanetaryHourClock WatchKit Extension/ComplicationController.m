@@ -40,14 +40,14 @@
     NSDate *nextSunriseAfterDate = [self nextSunriseAfterDate:date];
     [[WKExtension sharedExtension] scheduleBackgroundRefreshWithPreferredDate:nextSunriseAfterDate userInfo:nil scheduledCompletion:^(NSError * _Nullable error) {
         [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
+            [[CLKComplicationServer sharedInstance] extendTimelineForComplication:obj];
             
             NSDate *SunriseAfterNextSunriseAfterDate = [self nextSunriseAfterDate:nextSunriseAfterDate];
             
             
             [[WKExtension sharedExtension] scheduleBackgroundRefreshWithPreferredDate:SunriseAfterNextSunriseAfterDate userInfo:nil scheduledCompletion:^(NSError * _Nullable error) {
                 [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                    [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
+                    [[CLKComplicationServer sharedInstance] extendTimelineForComplication:obj];
                 }];
             }];
             
@@ -65,7 +65,7 @@
     handler(CLKComplicationPrivacyBehaviorShowOnLockScreen);
 }
 
-#pragma mark - Templates
+// Templates
 
 CLKComplicationTemplateModularLargeTallBody *(^complicationTemplateModularLargeTallBody)(NSString *, NSString *, UIColor *) = ^(NSString *headerText, NSString *bodyText, UIColor *tint)
 {
