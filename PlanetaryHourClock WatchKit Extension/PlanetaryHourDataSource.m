@@ -371,7 +371,7 @@ NSString *(^planetAbbreviatedNameForPlanet)(NSString *) = ^(NSString *planetName
     if ([planetName isEqualToString:@"Saturn"])
         return @"STRN";
     else
-        return @"EARTH";
+        return @"SUN";
 };
 
 
@@ -460,7 +460,7 @@ NSString *(^planetNameForHour)(NSDate * _Nullable, NSUInteger) = ^(NSDate * _Nul
             return @"Saturn";
             break;
         default:
-            return @"Earth";
+            return @"Sun";
     }
 };
 
@@ -496,7 +496,7 @@ typedef NS_ENUM(NSUInteger, PlanetColor) {
         else if ([planetarySymbol isEqualToString:@"♄"])
             return [UIColor grayColor];
         else
-            return [UIColor greenColor];
+            return [UIColor yellowColor];
     };
 };
 
@@ -518,7 +518,7 @@ typedef NS_ENUM(NSUInteger, PlanetColor) {
         else if ([planetarySymbol isEqualToString:@"♄"])
             return Saturn;
         else
-            return Earth;
+            return Sun;
     };
 };
 

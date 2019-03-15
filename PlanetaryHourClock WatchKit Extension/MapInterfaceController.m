@@ -23,10 +23,21 @@
 
 - (IBAction)displayTimeline
 {
-    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] switchControllers];
+    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] switchControllersWithSelectedHour:[(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] selectedIndex]];
 }
 
-- (void)awakeWithContext:(id)context {
+- (IBAction)nextPlanetaryHourAnnotation:(WKSwipeGestureRecognizer *)sender
+{
+    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] setSelectedIndex:[(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] selectedIndex] + 1];
+}
+
+- (IBAction)previousPlanetaryHourAnnotation:(id)sender
+{
+    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] setSelectedIndex:([(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] selectedIndex] + HOURS_PER_DAY) - 1];
+}
+
+- (void)awakeWithContext:(id)context
+{
     [super awakeWithContext:context];
     
     // Annotations location update timer

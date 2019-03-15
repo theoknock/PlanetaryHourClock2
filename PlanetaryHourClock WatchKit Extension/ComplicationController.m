@@ -16,22 +16,49 @@
 #pragma mark - Timeline Configuration
 
 - (void)getSupportedTimeTravelDirectionsForComplication:(CLKComplication *)complication withHandler:(void(^)(CLKComplicationTimeTravelDirections directions))handler {
-    handler(CLKComplicationTimeTravelDirectionForward);
+    handler(CLKComplicationTimeTravelDirectionNone);
 }
 
 - (void)getTimelineStartDateForComplication:(CLKComplication *)complication withHandler:(void(^)(NSDate * __nullable date))handler {
-    handler([PlanetaryHourDataSource.sharedDataSource solarTransits]([NSDate date], PlanetaryHourDataSource.sharedDataSource.locationManager.location)[Sunrise]);
+//    handler([PlanetaryHourDataSource.sharedDataSource solarTransits]([NSDate date], PlanetaryHourDataSource.sharedDataSource.locationManager.location)[Sunrise]);
+    handler(nil);
+}
+
+- (NSDate *)nextSunriseAfterDate:(NSDate *)date
+{
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSDateComponents *components = [[NSDateComponents alloc] init];
+    components.day = 1;
+    NSDate *tomorrow = [calendar dateByAddingComponents:components toDate:date options:NSCalendarMatchNextTimePreservingSmallerUnits];
+    NSDate *nextSunrise = [PlanetaryHourDataSource.sharedDataSource solarTransits](tomorrow, PlanetaryHourDataSource.sharedDataSource.locationManager.location)[Sunrise];
+    
+    return nextSunrise;
+}
+
+- (void)scheduleComplicationTimelineUpdateBackgroundTask:(NSDate *)date
+{
+    NSDate *nextSunriseAfterDate = [self nextSunriseAfterDate:date];
+    [[WKExtension sharedExtension] scheduleBackgroundRefreshWithPreferredDate:nextSunriseAfterDate userInfo:nil scheduledCompletion:^(NSError * _Nullable error) {
+        [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
+            
+            NSDate *SunriseAfterNextSunriseAfterDate = [self nextSunriseAfterDate:nextSunriseAfterDate];
+            
+            
+            [[WKExtension sharedExtension] scheduleBackgroundRefreshWithPreferredDate:SunriseAfterNextSunriseAfterDate userInfo:nil scheduledCompletion:^(NSError * _Nullable error) {
+                [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
+                }];
+            }];
+            
+        }];
+        if (error)
+            NSLog(@"Scheduled background timeline reload for complication error: %@", error.description);
+    }];
 }
 
 - (void)getTimelineEndDateForComplication:(CLKComplication *)complication withHandler:(void(^)(NSDate * __nullable date))handler {
-    //    NSDate *date = [NSDate date];
-    //    NSCalendar *calendar = [NSCalendar currentCalendar];
-    //    NSDateComponents *components = [[NSDateComponents alloc] init];
-    //    components.day = 1;
-    //    NSDate *tomorrow = [calendar dateByAddingComponents:components toDate:date options:NSCalendarMatchNextTimePreservingSmallerUnits];
-    //
-    //    handler(solarTransitDate(tomorrow, Sunrise));
-    handler([NSDate distantFuture]);
+    handler(nil);
 }
 
 - (void)getPrivacyBehaviorForComplication:(CLKComplication *)complication withHandler:(void(^)(CLKComplicationPrivacyBehavior privacyBehavior))handler {
@@ -287,6 +314,7 @@ CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKCompli
 
 - (void)getLocalizableSampleTemplateForComplication:(CLKComplication *)complication withHandler:(void (^)(CLKComplicationTemplate * _Nullable))handler
 {
+    [self scheduleComplicationTimelineUpdateBackgroundTask:[NSDate date]];
     handler(placeholderTemplate(complication));
 }
 
@@ -303,37 +331,44 @@ CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKCompli
             CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:startDate complicationTemplate:template] ;
             handler(tle);
             
-            if (hour == 23)
-                [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                    [[CLKComplicationServer sharedInstance] extendTimelineForComplication:obj];
-                }];
+//            if (hour == 23)
+//                [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//                    [[CLKComplicationServer sharedInstance] extendTimelineForComplication:obj];
+//                }];
         }
     });
 }
 
+- (void)getTimelineEntriesForComplication:(CLKComplication *)complication beforeDate:(NSDate *)date limit:(NSUInteger)limit withHandler:(void (^)(NSArray<CLKComplicationTimelineEntry *> * _Nullable))handler
+{
+    handler(nil);
+}
+
 - (void)getTimelineEntriesForComplication:(CLKComplication *)complication afterDate:(NSDate *)date limit:(NSUInteger)limit withHandler:(void(^)(NSArray<CLKComplicationTimelineEntry *> * __nullable entries))handler
 {
-    __block NSMutableArray *entries = [NSMutableArray arrayWithCapacity:limit];
-    __block CLKComplicationTemplate *template = nil;
+//    __block NSMutableArray *entries = [NSMutableArray arrayWithCapacity:limit];
+//    __block CLKComplicationTemplate *template = nil;
+//
+//    NSUInteger days = (NSUInteger)(limit % HOURS_PER_DAY);
+//    for (int day = 0; day < days; day++)
+//    {
+//        NSDate *dateIntervalStart = [date dateByAddingTimeInterval:day * SECONDS_PER_DAY];
+////        NSLog(@"Day %d of %d: %@", day, days, dateIntervalStart);
+//        NSDateInterval *dateInterval = [[NSDateInterval alloc] initWithStartDate:dateIntervalStart endDate:[NSDate distantFuture]];
+//        PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, dateIntervalStart, ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
+//            if ([dateInterval containsDate:startDate] && entries.count < limit)
+//            {
+//                template = templateForComplication(complication.family,
+//                                                  [PlanetaryHourDataSource.sharedDataSource planetaryHourData]([symbol string], name, [NSNumber numberWithInteger:hour], abbr, startDate, endDate, color));
+//                CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:startDate complicationTemplate:template] ;
+//                [entries addObject:tle];
+//            }
+//        });
+//    }
+//
+//    handler(entries);
     
-    NSUInteger days = (NSUInteger)(limit % HOURS_PER_DAY);
-    for (int day = 0; day < days; day++)
-    {
-        NSDate *dateIntervalStart = [date dateByAddingTimeInterval:day * SECONDS_PER_DAY];
-//        NSLog(@"Day %d of %d: %@", day, days, dateIntervalStart);
-        NSDateInterval *dateInterval = [[NSDateInterval alloc] initWithStartDate:dateIntervalStart endDate:[NSDate distantFuture]];
-        PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, dateIntervalStart, ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
-            if ([dateInterval containsDate:startDate] && entries.count < limit)
-            {
-                template = templateForComplication(complication.family,
-                                                  [PlanetaryHourDataSource.sharedDataSource planetaryHourData]([symbol string], name, [NSNumber numberWithInteger:hour], abbr, startDate, endDate, color));
-                CLKComplicationTimelineEntry *tle = [CLKComplicationTimelineEntry entryWithDate:startDate complicationTemplate:template] ;
-                [entries addObject:tle];
-            }
-        });
-    }
-    
-    handler(entries);
+    handler(nil);
 }
 
 @end

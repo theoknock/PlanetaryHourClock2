@@ -12,7 +12,7 @@
 
 @implementation ExtensionDelegate
 
-@synthesize span = _span, center = _center;
+@synthesize span = _span, center = _center, selectedIndex = _selectedIndex;
 
 - (MKCoordinateSpan)span
 {
@@ -26,23 +26,41 @@
 
 - (CLLocationCoordinate2D)center
 {
-    NSLog(@"Getting latitude %f, longitude %f", _center.latitude, _center.longitude);
+//    NSLog(@"Getting latitude %f, longitude %f", _center.latitude, _center.longitude);
     return _center;
 }
 
 - (void)setCenter:(CLLocationCoordinate2D)center
 {
-    NSLog(@"Setting latitude %f, longitude %f", center.latitude, center.longitude);
+//    NSLog(@"Setting latitude %f, longitude %f", center.latitude, center.longitude);
     _center = CLLocationCoordinate2DMake(center.latitude, center.longitude);
-    NSLog(@"Setting _latitude %f, _longitude %f", _center.latitude, _center.longitude);
+//    NSLog(@"Setting _latitude %f, _longitude %f", _center.latitude, _center.longitude);
 }
 
-- (void)switchControllers
+- (NSUInteger)selectedIndex
+{
+    return _selectedIndex;
+}
+
+- (void)setSelectedIndex:(NSUInteger)selectedIndex
+{
+    _selectedIndex = selectedIndex % HOURS_PER_DAY;
+    NSLog(@"Selected index: %lu", (unsigned long)_selectedIndex);
+}
+
+- (void)switchControllersWithSelectedHour:(NSUInteger)selectedHour
 {
     if ([[[WKExtension sharedExtension] visibleInterfaceController] isEqual:[[WKExtension sharedExtension] rootInterfaceController]])
     {
         // switch to map
-        [[[WKExtension sharedExtension] rootInterfaceController] presentControllerWithName:@"MapInterfaceController" context:nil];
+        PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
+            if (hour == selectedHour)
+            {
+                [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] setCenter:location.coordinate];
+                [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] setSelectedIndex:selectedHour];
+                [[[WKExtension sharedExtension] rootInterfaceController] presentControllerWithName:@"MapInterfaceController" context:nil];
+            }
+        });
     } else {
         // switch to timeline
         [[[WKExtension sharedExtension] visibleInterfaceController] dismissController];
@@ -57,6 +75,8 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"PlanetaryHoursDataSourceUpdatedNotification"
                                                         object:[[PlanetaryHourDataSource.sharedDataSource locationManager] location]
                                                       userInfo:nil];
+    
+//    [self scheduleComplicationTimelineUpdateBackgroundTask];
 }
 
 - (void)applicationDidBecomeActive {
@@ -66,13 +86,6 @@
 - (void)applicationWillResignActive {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, etc.
-//    [[WKExtension sharedExtension] scheduleBackgroundRefreshWithPreferredDate:[NSDate date] userInfo:nil scheduledCompletion:^(NSError * _Nullable error) {
-//        [[[CLKComplicationServer sharedInstance] activeComplications] enumerateObjectsUsingBlock:^(CLKComplication * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//            [[CLKComplicationServer sharedInstance] reloadTimelineForComplication:obj];
-//        }];
-//        if (error)
-//            NSLog(@"Scheduled background timeline reload for complication error: %@", error.description);
-//    }];
 }
 
 - (void)applicationWillEnterForeground
@@ -96,7 +109,7 @@
         } else if ([task isKindOfClass:[WKSnapshotRefreshBackgroundTask class]]) {
             // Snapshot tasks have a unique completion call, make sure to set your expiration date
             WKSnapshotRefreshBackgroundTask *snapshotTask = (WKSnapshotRefreshBackgroundTask*)task;
-            [snapshotTask setTaskCompletedWithDefaultStateRestored:YES estimatedSnapshotExpiration:[NSDate distantFuture] userInfo:nil];
+            [snapshotTask setTaskCompletedWithDefaultStateRestored:NO estimatedSnapshotExpiration:[NSDate distantFuture] userInfo:nil];
         } else if ([task isKindOfClass:[WKWatchConnectivityRefreshBackgroundTask class]]) {
             // Be sure to complete the background task once you’re done.
             WKWatchConnectivityRefreshBackgroundTask *backgroundTask = (WKWatchConnectivityRefreshBackgroundTask*)task;

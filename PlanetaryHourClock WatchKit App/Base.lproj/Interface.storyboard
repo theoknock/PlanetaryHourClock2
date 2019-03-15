@@ -14,7 +14,20 @@
             <objects>
                 <controller identifier="MapInterfaceController" title="Cancel" animationDuration="1" fullBounds="YES" fullScreen="YES" id="Xfn-Go-AEQ" userLabel="MapInterfaceController" customClass="MapInterfaceController">
                     <items>
-                        <map width="1" height="1" alignment="center" verticalAlignment="center" id="n4N-TQ-eww"/>
+                        <map width="1" height="1" alignment="center" verticalAlignment="center" id="n4N-TQ-eww">
+                            <gestureRecognizers>
+                                <swipeGestureRecognizer id="65a-RH-duz">
+                                    <connections>
+                                        <action selector="previousPlanetaryHourAnnotation:" destination="Xfn-Go-AEQ" id="WAi-bg-YVx"/>
+                                    </connections>
+                                </swipeGestureRecognizer>
+                                <swipeGestureRecognizer direction="2" id="DYf-xZ-teY">
+                                    <connections>
+                                        <action selector="nextPlanetaryHourAnnotation:" destination="Xfn-Go-AEQ" id="qth-GL-sEk"/>
+                                    </connections>
+                                </swipeGestureRecognizer>
+                            </gestureRecognizers>
+                        </map>
                     </items>
                     <menu key="menu" id="gP3-0L-I6L">
                         <items>

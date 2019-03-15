@@ -8,6 +8,7 @@
 
 #import "TableInterfaceController.h"
 #import "ExtensionDelegate.h"
+#import "MapInterfaceController.h"
 #import "PlanetaryHourDataSource.h"
 #import "PlanetaryHourRowController.h"
 #import "NotificationController.h"
@@ -22,7 +23,7 @@
 
 - (IBAction)displayMap
 {
-    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] switchControllers];
+    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] switchControllersWithSelectedHour:0];
 }
 
 - (void)awakeWithContext:(id)context {
@@ -34,7 +35,6 @@
         updatePlanetaryHoursTable(planetaryHoursTable);
     }];
 }
-
 - (void)willActivate {
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
@@ -85,13 +85,7 @@ void (^updatePlanetaryHoursTable)(__weak WKInterfaceTable *) = ^(__weak WKInterf
 
 - (void)table:(WKInterfaceTable *)table didSelectRowAtIndex:(NSInteger)rowIndex
 {
-    PlanetaryHourDataSource.sharedDataSource.planetaryHours(PlanetaryHourDataSource.sharedDataSource.locationManager.location, [NSDate date], ^(NSAttributedString * _Nonnull symbol, NSString * _Nonnull name, NSString * _Nonnull abbr, NSDate * _Nonnull startDate, NSDate * _Nonnull endDate, NSInteger hour, UIColor * _Nonnull color, CLLocation * _Nonnull location, CLLocationDistance distance, BOOL current) {
-        if (hour == rowIndex)
-        {
-            [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] setCenter:location.coordinate];
-            [self displayMap];
-        }
-    });
+    [(ExtensionDelegate *)[[WKExtension sharedExtension] delegate] switchControllersWithSelectedHour:rowIndex];
 }
 
 void (^addNotification)(NSDate *, NSString *, NSString *) = ^(NSDate *startTime, NSString *symbol, NSString *name)

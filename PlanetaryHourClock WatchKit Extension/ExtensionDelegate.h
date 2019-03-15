@@ -13,7 +13,9 @@
 
 @property (assign, nonatomic, setter=setSpan:) MKCoordinateSpan span;
 @property (assign, nonatomic, setter=setCenter:) CLLocationCoordinate2D center;
+@property (assign, nonatomic, setter=setSelectedIndex:) NSUInteger selectedIndex;
 
-- (void)switchControllers;
+
+- (void)switchControllersWithSelectedHour:(NSUInteger)selectedHour;
 
 @end

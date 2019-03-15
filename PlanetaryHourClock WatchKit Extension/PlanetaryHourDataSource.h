@@ -30,8 +30,7 @@ typedef NS_ENUM(NSUInteger, Planet) {
     Mercury,
     Jupiter,
     Venus,
-    Saturn,
-    Earth
+    Saturn
 };
 
 typedef void(^PlanetaryHourCompletionBlock)(NSAttributedString *symbol, NSString *name, NSString *abbr, NSDate *startDate, NSDate *endDate, NSInteger hour, UIColor *color, CLLocation *location, CLLocationDistance distance, BOOL current);
