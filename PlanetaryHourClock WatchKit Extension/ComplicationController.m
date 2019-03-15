@@ -294,8 +294,6 @@ CLKComplicationTemplate *(^templateForComplication)(CLKComplicationFamily, NSDic
     return template;
 };
 
-#pragma mark - Placeholder templates
-
 CLKComplicationTemplate *(^placeholderTemplate)(CLKComplication *) = ^(CLKComplication *complication)
 {
     NSNumber *hour = [NSNumber numberWithInteger:0];
